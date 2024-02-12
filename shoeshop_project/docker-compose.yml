@@ -10,6 +10,7 @@ services:
       - postgres:/var/lib/postgresql/data/
     ports:
       - '5432:5432'
+
   app:
     build: .
     container_name: app
@@ -21,8 +22,6 @@ services:
       - ./:/app
       - static_volume:/app/static
       - media_volume:/app/media
-#      - ./static:/static
-#      - ./media:/media
     expose:
       - 8000
     ports:
@@ -32,12 +31,9 @@ services:
 
   nginx:
     image: nginx:latest
-#    build: ./nginx/
     container_name: nginx
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-#      - ./static:/static
-#      - ./media:/media
       - static_volume:/static
       - media_volume:/media
     ports:
@@ -46,10 +42,23 @@ services:
       - app
 
   celery:
-    image: celery:4.0
+    build: .
     container_name: celery
     restart: unless-stopped
     command: celery -A config worker -l INFO
+    env_file: .env
+    volumes:
+      - ./:/app
+    depends_on:
+      - app
+      - redis
+      - postgres
+
+  celery-beat:
+    build: .
+    container_name: celery-beat
+    restart: unless-stopped
+    command: celery -A config beat -l INFO
     env_file: .env
     volumes:
       - ./:/app
@@ -76,6 +85,7 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+
 
   stripe:
     image: stripe/stripe-cli:v1.19.1
