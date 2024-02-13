@@ -18,6 +18,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
+SECRET_KEY = os.environ.get('SECRET_KEY')
+
 CART_SESSION_ID = 'cart'
 
 # убрал 8000
@@ -27,12 +29,8 @@ PAYMENT_SUCCESS_URL = 'http://localhost/success/'
 PAYMENT_CANCEL_URL = 'http://localhost/cancel/'
 
 STRIPE_PUBLIC_KEY = os.environ.get('STRIPE_PUBLIC_KEY')
-
 STRIPE_SECRET_KEY = os.environ.get('STRIPE_SECRET_KEY')
-
 STRIPE_WEBHOOK_SECRET = os.environ.get('STRIPE_WEBHOOK_SECRET')
-
-SECRET_KEY = os.environ.get('SECRET_KEY')
 
 DEBUG = os.environ.get('DEBUG', True)
 
@@ -84,7 +82,6 @@ INTERNAL_IPS = [
     '127.0.0.1',
 ]
 
-
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -106,7 +103,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
@@ -152,14 +148,12 @@ DATABASES = {
 # ]
 
 AUTH_USER_MODEL = "accounts.CustomUser"
-
 AUTHENTICATION_BACKENDS = [
     # 'accounts.backends.EmailAuthBackend',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
 LOGIN_REDIRECT_URL = '/'
-
 LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
@@ -178,10 +172,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
-
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-# STATIC_ROOT = '/app/static/'
-
 STATICFILES_DIRS = []
 
 # Default primary key field type
