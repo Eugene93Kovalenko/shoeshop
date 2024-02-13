@@ -40,7 +40,7 @@ class ShopView(generic.ListView):
     paginate_by = 2
 
     def get_filters(self):
-        brand_q, size_q, category_q, color_q, material_q = Q(), Q(), Q(), Q(), Q()
+        brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
 
         if self.request.GET.getlist('brand'):
             for brand in self.request.GET.getlist('brand'):
@@ -84,7 +84,6 @@ class ShopView(generic.ListView):
         context['selected_ordering'] = self.request.GET.get('ordering')
         context['selected_brand'] = [brand for brand in self.request.GET.getlist('brand')]
         context['selected_size'] = [int(size) for size in self.request.GET.getlist('size')]
-        print(context['selected_size'])
         context['selected_category'] = [brand for brand in self.request.GET.getlist('category')]
         context['selected_color'] = [brand for brand in self.request.GET.getlist('color')]
         context['selected_search'] = self.request.GET.get('q')

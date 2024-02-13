@@ -13,10 +13,10 @@ app.conf.update(
     broker_transport_options={"visibility_timeout": 1800},
 )
 app.autodiscover_tasks()
-# TODO
+
 app.conf.beat_schedule = {
-    'name': {
-        'task': 'analytic.tasks.get_analytic_from_hh_api',
-        'schedule': crontab(minute='0', hour='3'),
+    'test_celery_beat': {
+        'task': 'orders.tasks.send_email_with_orders_count_made_yesterday',
+        'schedule': crontab(minute='5', hour='0'),
     }
 }

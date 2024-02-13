@@ -6,10 +6,7 @@ from products.models import *
 
 
 class OrderItem(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     product_variation = models.ForeignKey(ProductVariation, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField(default=1)
     ordered = models.BooleanField(default=False)
@@ -28,20 +25,21 @@ class OrderItem(models.Model):
 
 
 class Order(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE,
-                             null=True,
-                             blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     products = models.ManyToManyField(OrderItem, related_name='shipping_address')
-    # products = models.ForeignKey(OrderItem, on_delete=models.CASCADE, blank=True, null=True)
     delivery_price = models.DecimalField(default=50, max_digits=7, decimal_places=2)
-    start_date = models.DateTimeField(auto_now_add=True)
-    ordered_date = models.DateTimeField()
+    start_datetime = models.DateTimeField(auto_now_add=True)
+    ordered_datetime = models.DateTimeField()
     ordered = models.BooleanField(default=False)
-    shipping_address = models.ForeignKey(
-        'ShippingAddress', related_name='shipping_address', on_delete=models.SET_NULL, blank=True, null=True)
+    shipping_address = models.ForeignKey('ShippingAddress',
+                                         related_name='shipping_address',
+                                         on_delete=models.SET_NULL,
+                                         blank=True,
+                                         null=True)
 
     def __str__(self):
+        if self.ordered:
+            return f"{self.user} | Ordered: {self.ordered} | {self.ordered_datetime}"
         return f"{self.user} | Ordered: {self.ordered}"
 
     class Meta:
@@ -50,9 +48,7 @@ class Order(models.Model):
 
 
 class ShippingAddress(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.CASCADE,
-                             null=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True)
     country = CountryField(multiple=False)
     region = models.CharField(max_length=100)
     city = models.CharField(max_length=100)
@@ -70,16 +66,8 @@ class ShippingAddress(models.Model):
 
 class Payment(models.Model):
     stripe_charge_id = models.CharField(max_length=100)
-    user = models.ForeignKey(settings.AUTH_USER_MODEL,
-                             on_delete=models.SET_NULL,
-                             null=True,
-                             blank=True)
-    order = models.ForeignKey(
-        to=Order,
-        on_delete=models.CASCADE,
-        related_name='payments',
-        null=True
-    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments', null=True)
     amount = models.FloatField()
     timestamp = models.DateTimeField(auto_now_add=True)
 

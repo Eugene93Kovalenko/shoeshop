@@ -65,6 +65,7 @@ INSTALLED_APPS = [
     'django_countries',
     'crispy_forms',
     'debug_toolbar',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -166,7 +167,7 @@ LOGOUT_REDIRECT_URL = '/'
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 
@@ -195,6 +196,8 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # Celery
 CELERY_BROKER_URL = os.environ.get('CELERY_BROKER', 'redis://redis:6379/0')
 CELERY_RESULT_BACKEND = os.environ.get('CELERY_BACKEND', 'redis://redis:6379/0')
+# CELERY_CACHE_BACKEND = 'default'
+# CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # SMTP
 EMAIL_USE_SSL = True
