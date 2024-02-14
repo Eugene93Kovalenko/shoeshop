@@ -14,7 +14,9 @@ from .forms import ContactForm, ReviewForm
 from .models import *
 from . import tasks
 from .queries import get_all_products, get_filtered_products_for_shop_view, \
-    get_all_categories, get_all_sizes, get_all_brands, get_all_colors, get_ordering_option
+    get_all_categories, get_all_sizes, get_all_brands, get_all_colors, get_ordering_option, get_product_from_slug, \
+    get_single_product_images, get_single_product_variations, get_single_product_reviews, \
+    get_single_product_reviews_quantity, get_single_product_rating, create_product_review, get_ratings_count
 
 
 class HomeView(generic.ListView):
@@ -133,7 +135,7 @@ class ProductDetailView(generic.DetailView):
             if len(request.session['recently_viewed']) > 4:
                 request.session['recently_viewed'].pop()
         request.session.modified = True
-        current_product = Product.objects.get(slug=self.kwargs["product_slug"])
+        current_product = get_product_from_slug(self.kwargs["product_slug"])
         current_product.last_visit = timezone.now()
         current_product.save()
         return super().get(request, *args, **kwargs)
@@ -141,33 +143,27 @@ class ProductDetailView(generic.DetailView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = ReviewForm()
-        context["product_images"] = ProductImage.objects.filter(product__slug=self.kwargs["product_slug"])
+        context["product_images"] = get_single_product_images(self.kwargs["product_slug"])
         context['list_of_product_sizes'] = \
-            [product.size for product in ProductVariation.objects.filter(product__slug=self.kwargs["product_slug"])]
-        context['product_reviews'] = \
-            Review.objects.filter(product__slug=self.kwargs["product_slug"]).order_by('-created_at')
-        context['reviews_quantity'] = Review.objects.filter(product__slug=self.kwargs["product_slug"]).count()
+            [product.size for product in get_single_product_variations(self.kwargs["product_slug"])]
+        context['product_reviews'] = get_single_product_reviews(self.kwargs["product_slug"])
+        context['reviews_quantity'] = get_single_product_reviews_quantity(self.kwargs["product_slug"])
         context['average_rating'] = self.get_average_rating()
-        ratings_count = Review.objects.filter(product__slug=self.kwargs["product_slug"]) \
-            .values('rate') \
-            .annotate(count=Count('rate')) \
-            .annotate(percent=ExpressionWrapper((F('count') * 100) / context['reviews_quantity'],
-                      output_field=DecimalField()))
+        ratings_count = get_ratings_count(self.kwargs["product_slug"])
         for rating_count in ratings_count:
             context[f'count_of_{rating_count["rate"]}_star_reviews'] = rating_count['count']
             context[f'percentage_of_{rating_count["rate"]}_star_reviews'] = rating_count['percent']
         return context
 
-    def _round_custom(self, num, step):
+    # todo move to helpers?
+    def round_int_custom(self, num, step):
         return round(num / step) * step
 
     def get_average_rating(self):
-        average_product_rating = Review.objects.filter(product__slug=self.kwargs["product_slug"]) \
-            .aggregate(average=Avg('rate', default=0))
-        if average_product_rating:
-            context = self._round_custom(float(average_product_rating['average']), 0.5)
-            return context
-        return None
+        average_product_rating = get_single_product_rating(self.kwargs["product_slug"])
+        if not average_product_rating:
+            return None
+        return self.round_int_custom(float(average_product_rating['average']), 0.5)
 
 
 class ProductFormView(SingleObjectMixin, generic.FormView):
@@ -175,6 +171,7 @@ class ProductFormView(SingleObjectMixin, generic.FormView):
     template_name = "products/product-detail.html"
     form_class = ReviewForm
 
+    # todo: login required?
     def post(self, request, *args, **kwargs):
         user = self.request.user
         if user.is_anonymous:
@@ -186,16 +183,16 @@ class ProductFormView(SingleObjectMixin, generic.FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
-        product = Product.objects.get(slug=self.kwargs["product_slug"])
-        user = self.request.user
+        product = get_product_from_slug(self.kwargs["product_slug"])
         form_data = form.cleaned_data
-        review = Review.objects.create(product=product,
-                                       rate=form_data['rate'],
-                                       text=form_data['text'],
-                                       user=user,
-                                       first_name=form_data['first_name'],
-                                       last_name=form_data['last_name'])
-        review.save()
+        create_product_review(
+            product,
+            form_data['rate'],
+            form_data['text'],
+            self.request.user,
+            form_data['first_name'],
+            form_data['last_name']
+        )
         return super(ProductFormView, self).form_valid(form)
 
     def get_success_url(self):

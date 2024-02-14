@@ -163,6 +163,7 @@ class Review(models.Model):
     class Meta:
         verbose_name = 'Review'
         verbose_name_plural = 'Reviews'
+        ordering = ['-created_at']
 
     def __str__(self):
         return f'{str(self.user)} | {self.product} | {self.rate}'
