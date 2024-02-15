@@ -1,14 +1,35 @@
 {% load static %}
-{% load custom_tags %}
-{% if request.path != '/' %}
-    <div class="breadcrumbs">
-        <div class="container">
-            <div class="row">
-                <div class="col">
-                    <p class="bread"><span><a href="{% url 'products:home' %}">Home</a></span> /
-                        <span>{% get_path_for_breadcrumbs request.path %}</span></p>
-                </div>
-            </div>
-        </div>
-    </div>
+
+{% if breadcrumbs %}
+<div class="container">
+    {% load i18n %}
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb alert alert-light" itemprop="breadcrumb" itemscope
+            itemtype="https://schema.org/BreadcrumbList">
+            {% for item in breadcrumbs %}
+            {% if forloop.last %}
+            <li class="breadcrumb-item active" itemprop="itemListElement" itemscope
+                itemtype="https://schema.org/ListItem" aria-current="page">
+                <span itemprop="name">{{ item.name|upper }}</span>
+                <meta itemprop="position" content='{{item.position}}'/>
+            </li>
+            {% else %}
+            <li class="breadcrumb-item" itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                {% if item.resolved %}
+                <a itemprop="item" href="{{item.url}}">
+                    <span itemprop="name">{{ item.name|upper }}</span>
+                </a>
+                <meta itemprop="position" content="{{item.position}}"/>
+                {%else%}
+                <span itemprop="name">{{ item.name|upper }}</span>
+                <meta itemprop="position" content="{{item.position}}"/>
+
+                {%endif%}
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+</div>
 {% endif %}

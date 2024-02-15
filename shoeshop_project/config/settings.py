@@ -43,7 +43,11 @@ DEBUG_TOOLBAR_CONFIG = {
     'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
 }
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'app',
+]
 
 # Application definition
 INSTALLED_APPS = [
@@ -64,6 +68,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'debug_toolbar',
     'django_celery_beat',
+    'dynamic_breadcrumbs',
 ]
 
 MIDDLEWARE = [
@@ -97,6 +102,7 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
 
                 'orders.context_processors.cart',
+                'dynamic_breadcrumbs.context_processors.breadcrumbs',
             ],
         },
     },
@@ -110,11 +116,11 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'postgres',
-        'USER': 'eugene',
-        'PASSWORD': '1111',
-        'HOST': 'postgres',
-        'PORT': '5432',
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 
@@ -167,7 +173,6 @@ USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
@@ -196,7 +201,6 @@ EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = 465
-
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER

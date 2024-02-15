@@ -6,6 +6,7 @@ from orders.models import OrderItem
 
 register = template.Library()
 
+
 # для того, чтобы пагинация работала при сортировке
 @register.simple_tag()
 def relative_url(argument, value, urlencode=None):
@@ -17,7 +18,6 @@ def relative_url(argument, value, urlencode=None):
         filtered_querystring = querystring[1:] if querystring[0].startswith('page') else querystring
         encoded_querystring = '&'.join(filtered_querystring)
         url += f'&{encoded_querystring}'
-    # print(url)
     return url
 
 
@@ -60,7 +60,6 @@ def query_transform(context):
     current_parameters = context['request'].GET.urlencode()
     url = f'?{current_parameters}'
     if 'q' in previous_parameter:
-        # print('---------------'
         return f'{previous_parameter}&{current_parameters}'
     return url
 
@@ -74,41 +73,3 @@ def split_url_parameters(stdin: str, exclude: str) -> list[list[str, str]]:
     unique_parameters = [list(param) for param in set(tuple(param_list) for param_list in filtered_parameters)]
     without_empty_values = list(filter(lambda x: x[1], unique_parameters))
     return without_empty_values
-
-
-# перенести во views
-@register.simple_tag
-def get_path_for_breadcrumbs(url):
-    path = f'{url[1:-1]}'
-    return path
-
-
-# @register.simple_tag(takes_context=True)
-# def query_transform(context, **kwargs):
-#     '''
-#     Returns the URL-encoded querystring for the current page,
-#     updating the params with the key/value pairs passed to the tag.
-#
-#     E.g: given the querystring ?foo=1&bar=2
-#     {% query_transform bar=3 %} outputs ?foo=1&bar=3
-#     {% query_transform foo='baz' %} outputs ?foo=baz&bar=2
-#     {% query_transform foo='one' bar='two' baz=99 %} outputs ?foo=one&bar=two&baz=99
-#
-#     A RequestContext is required for access to the current querystring.
-#     '''
-#     query = context['request'].GET.copy()
-#     for k, v in kwargs.items():
-#         query[k] = v
-#     for k in [k for k, v in query.items() if not v]:
-#         del query[k]
-#     return query.urlencode()
-
-
-# @register.simple_tag(takes_context=True)
-# def param_replace(context, **kwargs):
-#     d = context['request'].GET.copy()
-#     for k, v in kwargs.items():
-#         d[k] = v
-#     for k in [k for k, v in d.items() if not v]:
-#         del d[k]
-#     return d.urlencode()

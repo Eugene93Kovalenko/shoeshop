@@ -7,7 +7,7 @@ def get_all_products():
     return Product.objects.all()
 
 
-def get_filtered_products_for_shop_view(filters, ordering, gender_filter):
+def get_filtered_products(filters, ordering, gender_filter):
     if ordering:
         return Product.objects.filter(filters, **gender_filter).order_by(ordering).distinct()
     return Product.objects.filter(filters, **gender_filter).distinct()

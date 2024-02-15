@@ -84,7 +84,7 @@ class Product(models.Model):
     slug = models.SlugField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    num_visits = models.IntegerField(default=0)
+    purchases_count = models.PositiveIntegerField(default=0)
     last_visit = models.DateTimeField(auto_now=True, blank=True, null=True)
     category = models.ManyToManyField(Category, related_name="products", blank=True)
 

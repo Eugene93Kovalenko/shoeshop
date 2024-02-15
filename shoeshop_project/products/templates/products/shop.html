@@ -6,12 +6,10 @@
 <div class="colorlib-loader"></div>
 
 <div id="page">
-    {% include 'include/breadcrumbs.html' %}
 
-    <!--<div class="colorlib-product">-->
+    <!--    <div class="colorlib-product">-->
     <div class="container">
         <div class="row">
-
             {% include 'include/sidebar_filters.html' %}
             <div class="col-lg-9 col-xl-9">
                 <div class="row row-pb-md">
@@ -20,8 +18,7 @@
                     <div class="col-lg-4 mb-4 text-center">
                         <div class="product-entry border">
                             <a href="{{ product.get_absolute_url }}" class="prod-img">
-                                <img src="{{ product.images.first.get_absolute_url }}" class="img-fluid"
-                                     alt="img">
+                                <img src="{{ product.images.first.get_absolute_url }}" class="img-fluid" alt="img">
                             </a>
                             <div class="desc">
                                 <h2><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h2>
@@ -83,5 +80,6 @@
     var new_url = url.toString();
     return new_url
   }
+
 
 </script>

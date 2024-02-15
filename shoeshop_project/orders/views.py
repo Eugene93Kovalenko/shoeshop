@@ -17,6 +17,8 @@ from orders.cart import Cart
 from orders.forms import CheckoutForm
 from orders.models import *
 from . import tasks
+from .queries import update_product_purchases_count_and_quantity_in_stock, create_payment, get_custom_user, \
+    update_order_items, update_order, get_order, get_recently_viewed_products, get_order_items
 
 
 class CartView(generic.ListView):
@@ -30,20 +32,9 @@ class CartView(generic.ListView):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         if self.request.session.get('recently_viewed'):
-            context['recently_viewed'] = Product.objects.filter(slug__in=self.request.session[
-                'recently_viewed']).order_by('-last_visit')[:4]
+            context['recently_viewed'] = get_recently_viewed_products(self.request.session['recently_viewed'])
         # context['massage'] = messages.warning(self.request, "Вы не добавили ни одного товара в корзину")
         return context
-
-
-# class CartView(generic.View):
-#     def get(self, request, *args, **kwargs):
-#         view = CartListView.as_view()
-#         return view(request, *args, **kwargs)
-
-    # def post(self, request, *args, **kwargs):
-    #     view = CartCouponFormView.as_view()
-    #     return view(request, *args, **kwargs)
 
 
 @require_POST
@@ -81,18 +72,20 @@ class CheckoutFormView(generic.FormView):
     def form_valid(self, form):
         user = self.request.user
         cart = Cart(self.request)
-        ordered_date = timezone.now()
-        existing_order = Order.objects.filter(user=user, ordered=False)
+        ordered_datetime = timezone.now()
+        existing_order = get_order(user)
         if existing_order:
-            Order.objects.get(user=user, ordered=False).delete()
-
-            existing_order_items = OrderItem.objects.filter(user=user, ordered=False)
+            # delete_order(user)
+            existing_order.delete()
+            existing_order_items = get_order_items(user)
+            #todo проверить, надо ли так удалять
             for item in existing_order_items:
                 item.delete()
 
+        # todo in celery
         order = Order.objects.create(
             user=user,
-            ordered_date=ordered_date,
+            ordered_datetime=ordered_datetime,
             ordered=False)
         for item in cart:
             order_item = OrderItem.objects.create(
@@ -176,8 +169,8 @@ class CreateStripeCheckoutSessionView(generic.View):
         )
         return line_items_list
 
-    def get_user_email(self):
-        return self.request.user.shipping_email
+    # def get_user_email(self):
+    #     return self.request.user.shipping_email
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -206,29 +199,24 @@ class StripeWebhookView(generic.View):
         return HttpResponse(status=200)
 
 
+# todo atomic
 def _handle_successful_payment(session):
     user_id = session['client_reference_id']
     user_email = session['customer_details']['email']
     user_name = session['customer_details']['name']
-    user = CustomUser.objects.get(id=user_id)
     amount = session['amount_total']
-    ordered_date = timezone.now()
-    order_item = OrderItem.objects.filter(
-        user=user,
-        ordered=False)
-    order_item.update(ordered=True)
-    order = Order.objects.filter(
-        user=user,
-        ordered=False)
-    Payment.objects.create(
-        stripe_charge_id=session['id'],
-        user=user,
-        order=order[0],
-        amount=amount / 100,
-    )
-    order.update(
-        ordered_date=ordered_date,
-        ordered=True)
+    user = get_custom_user(user_id)
+
+    # todo убрать?
+    update_order_items(user)
+
+    order = get_order(user)
+
+    update_product_purchases_count_and_quantity_in_stock(order)
+
+    update_order(order)
+
+    create_payment(session['id'], user, order, amount)
 
     tasks.send_order_conformation_mail.delay(user_name, user_email)
 

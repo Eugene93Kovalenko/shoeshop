@@ -13,10 +13,10 @@ from django.views.generic.detail import SingleObjectMixin
 from .forms import ContactForm, ReviewForm
 from .models import *
 from . import tasks
-from .queries import get_all_products, get_filtered_products_for_shop_view, \
-    get_all_categories, get_all_sizes, get_all_brands, get_all_colors, get_ordering_option, get_product_from_slug, \
-    get_single_product_images, get_single_product_variations, get_single_product_reviews, \
-    get_single_product_reviews_quantity, get_single_product_rating, create_product_review, get_ratings_count
+from .queries import get_all_products, get_filtered_products, get_all_categories, get_all_sizes, get_all_brands, \
+    get_all_colors, get_ordering_option, get_product_from_slug, get_single_product_images, \
+    get_single_product_variations, get_single_product_reviews, get_single_product_reviews_quantity, \
+    get_single_product_rating, create_product_review, get_ratings_count
 
 
 class HomeView(generic.ListView):
@@ -63,7 +63,7 @@ class ShopView(generic.ListView):
         return gender_filter
 
     def get_queryset(self):
-        return get_filtered_products_for_shop_view(self.get_filters(), self.get_ordering(), self.get_gender_filter())
+        return get_filtered_products(self.get_filters(), self.get_ordering(), self.get_gender_filter())
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
