@@ -1,4 +1,5 @@
 from django.db.models import Avg, Count, ExpressionWrapper, F, DecimalField
+from django.shortcuts import get_object_or_404
 
 from products.models import Product, Brand, Size, Category, Color, ProductImage, ProductVariation, Review
 
@@ -31,6 +32,9 @@ def get_all_colors():
 
 def get_ordering_option():
     return Product.ORDERING_OPTIONS
+
+
+
 
 
 def get_product_from_slug(slug):

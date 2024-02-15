@@ -1,3 +1,4 @@
+import time
 from decimal import Decimal
 
 import stripe
@@ -18,7 +19,8 @@ from orders.forms import CheckoutForm
 from orders.models import *
 from . import tasks
 from .queries import update_product_purchases_count_and_quantity_in_stock, create_payment, get_custom_user, \
-    update_order_items, update_order, get_order, get_recently_viewed_products, get_order_items
+    update_order_items, update_order, get_order, get_recently_viewed_products, get_order_items, get_product_variation, \
+    create_order, create_order_item, get_shipping_address, create_shipping_address
 
 
 class CartView(generic.ListView):
@@ -45,7 +47,7 @@ def add_to_cart(request, slug):
         return redirect(request.META.get('HTTP_REFERER'))
     quantity = int(request.POST.get('quantity'))
     size = request.POST.get('product-size')
-    product_variation = get_object_or_404(ProductVariation, product__slug=slug, size__name=size)
+    product_variation = get_product_variation(slug, size)
     if product_variation.quantity < quantity:
         messages.warning(request, "На складе нет этого товара в таком количестве")
         return redirect(request.META.get('HTTP_REFERER'))
@@ -53,13 +55,13 @@ def add_to_cart(request, slug):
     return redirect("orders:cart")
 
 
+@require_POST
 def remove_from_cart(request, slug):
     cart = Cart(request)
-    if request.method == 'POST':
-        size = request.POST.get('size')
-        product_variation = get_object_or_404(ProductVariation, product__slug=slug, size__name=size)
-        cart.delete(product_variation=product_variation)
-        return redirect("orders:cart")
+    size = request.POST.get('size')
+    product_variation = get_product_variation(slug, size)
+    cart.delete(product_variation=product_variation)
+    return redirect("orders:cart")
 
 
 class CheckoutFormView(generic.FormView):
@@ -70,44 +72,33 @@ class CheckoutFormView(generic.FormView):
         return reverse('orders:create-checkout-session')
 
     def form_valid(self, form):
-        user = self.request.user
         cart = Cart(self.request)
-        ordered_datetime = timezone.now()
+        user = self.request.user
         existing_order = get_order(user)
         if existing_order:
-            # delete_order(user)
             existing_order.delete()
             existing_order_items = get_order_items(user)
-            #todo проверить, надо ли так удалять
             for item in existing_order_items:
                 item.delete()
-
-        # todo in celery
-        order = Order.objects.create(
-            user=user,
-            ordered_datetime=ordered_datetime,
-            ordered=False)
+        new_order = create_order(user)
         for item in cart:
-            order_item = OrderItem.objects.create(
-                user=user,
-                product_variation=item['product_variation'],
-                quantity=item['quantity']
-            )
-            order.products.add(order_item)
-        old_shipping_address = ShippingAddress.objects.filter(user=user)
-        if old_shipping_address:
-            ShippingAddress.objects.get(user=user).delete()
-        shipping_address = ShippingAddress.objects.create(
-            user=user,
-            country=form.cleaned_data['country'],
-            region=form.cleaned_data['region'],
-            city=form.cleaned_data['city'],
-            zip=form.cleaned_data['zip'],
-            address=form.cleaned_data['address'],
-            default=True
-        )
-        order.shipping_address = shipping_address
-        order.save()
+            order_item = create_order_item(user, item['product_variation'], item['quantity'])
+            new_order.products.add(order_item)
+        existing_shipping_address = get_shipping_address(user)
+        if existing_shipping_address:
+            existing_shipping_address.delete()
+        new_shipping_address = create_shipping_address(user, form)
+        # shipping_address = ShippingAddress.objects.create(
+        #     user=user,
+        #     country=form.cleaned_data['country'],
+        #     region=form.cleaned_data['region'],
+        #     city=form.cleaned_data['city'],
+        #     zip=form.cleaned_data['zip'],
+        #     address=form.cleaned_data['address'],
+        #     default=True
+        # )
+        new_order.shipping_address = new_shipping_address
+        new_order.save()
 
         user.first_name = form.cleaned_data['first_name']
         user.last_name = form.cleaned_data['last_name']
@@ -168,9 +159,6 @@ class CreateStripeCheckoutSessionView(generic.View):
             }
         )
         return line_items_list
-
-    # def get_user_email(self):
-    #     return self.request.user.shipping_email
 
 
 @method_decorator(csrf_exempt, name="dispatch")

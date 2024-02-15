@@ -64,11 +64,12 @@ class Size(models.Model):
     class Meta:
         verbose_name = "Size"
         verbose_name_plural = "Sizes"
+        ordering = ["name"]
 
 
 class Product(models.Model):
     ORDERING_OPTIONS = [
-        ('Popularity', '-num_visits'),
+        ('Popularity', '-purchases_count'),
         ('Last', '-created_at'),
         ('Price high first', '-price'),
         ('Price low first', 'price')

@@ -4,11 +4,8 @@
 {% block content %}
 <div class="colorlib-loader"></div>
 <div id="page">
-    {% include 'include/breadcrumbs.html' %}
-
     <div class="colorlib-product">
         <div class="container">
-            {% include 'include/order_breadcrumbs.html' %}
             <form method="POST">
                 {% csrf_token %}
                 <div class="row">
