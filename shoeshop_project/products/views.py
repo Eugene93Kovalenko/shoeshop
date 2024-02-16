@@ -72,7 +72,6 @@ class ShopView(generic.ListView):
         context['sizes_list'] = get_all_sizes()
         context['categories_list'] = get_all_categories()
         context['colors_list'] = get_all_colors()
-        context['genders_list'] = Gender.objects.all().exclude(name='Unisex').order_by('name')
         context['selected_ordering'] = self.request.GET.get('ordering')
         context['selected_brand'] = [brand for brand in self.request.GET.getlist('brand')]
         context['selected_size'] = [int(size) for size in self.request.GET.getlist('size')]

@@ -1,13 +1,10 @@
 {% extends 'base.html' %}
-{% load static %}
 <!--{% load custom_tags %}-->
 
 {% block content %}
 <div class="colorlib-loader"></div>
 
 <div id="page">
-
-    <!--    <div class="colorlib-product">-->
     <div class="container">
         <div class="row">
             {% include 'include/sidebar_filters.html' %}
@@ -37,11 +34,10 @@
                     <h1>No products found</h1>
                     {% endif %}
                 </div>
-                {% include 'include/pagination.html' %}
+<!--                {% include 'include/pagination.html' %}-->
             </div>
         </div>
     </div>
-    <!--</div>-->
 </div>
 {% include 'include/partners.html' %}
 {% endblock content %}

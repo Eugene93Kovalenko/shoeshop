@@ -21,8 +21,8 @@ services:
       - ./:/app
       - static_volume:/app/static
       - media_volume:/app/media
-    expose:
-      - 8000
+#    expose:
+#      - 8000
     ports:
       - '8000:8000'
     depends_on:

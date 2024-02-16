@@ -1,9 +1,6 @@
-{% load static %}
-
 {% if breadcrumbs %}
 <div class="container">
     {% load i18n %}
-
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb alert alert-light" itemprop="breadcrumb" itemscope
             itemtype="https://schema.org/BreadcrumbList">
@@ -24,7 +21,6 @@
                 {%else%}
                 <span itemprop="name">{{ item.name|upper }}</span>
                 <meta itemprop="position" content="{{item.position}}"/>
-
                 {%endif%}
             </li>
             {% endif %}
