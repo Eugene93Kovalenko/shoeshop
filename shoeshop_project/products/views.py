@@ -1,11 +1,7 @@
-# from datetime import datetime
-# from time import timezone
-import time
-
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, SearchHeadline
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.utils import timezone
 
-from django.db.models import Q, Avg, Count, F, ExpressionWrapper, DecimalField
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
 from django.views.generic.detail import SingleObjectMixin
@@ -16,7 +12,8 @@ from . import tasks
 from .queries import get_all_products, get_filtered_products, get_all_categories, get_all_sizes, get_all_brands, \
     get_all_colors, get_ordering_option, get_product_from_slug, get_single_product_images, \
     get_single_product_variations, get_single_product_reviews, get_single_product_reviews_quantity, \
-    get_single_product_rating, create_product_review, get_ratings_count
+    create_product_review, get_ratings_count, get_queryset_after_search
+from .services import get_average_rating
 
 
 class HomeView(generic.ListView):
@@ -77,7 +74,6 @@ class ShopView(generic.ListView):
         context['selected_size'] = [int(size) for size in self.request.GET.getlist('size')]
         context['selected_category'] = [brand for brand in self.request.GET.getlist('category')]
         context['selected_color'] = [brand for brand in self.request.GET.getlist('color')]
-        context['selected_search'] = self.request.GET.get('q')
         return context
 
 
@@ -86,21 +82,8 @@ class SearchView(ShopView):
         query = self.request.GET.get("q")
         search_vector = SearchVector("name", "description")
         search_query = SearchQuery(query)
-        if super().get_filters() or super().get_ordering():
-            search_result = (
-                super().get_queryset().annotate(
-                    search=search_vector, rank=SearchRank(search_vector, search_query)
-                )
-                .filter(search=search_query)
-            )
-        else:
-            search_result = (
-                Product.objects.annotate(
-                    search=search_vector, rank=SearchRank(search_vector, search_query)
-                )
-                .filter(search=search_query)
-            )
-        return search_result
+        searched_queryset = get_queryset_after_search(super().get_queryset(), search_vector, search_query)
+        return searched_queryset
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -125,6 +108,7 @@ class ProductDetailView(generic.DetailView):
     slug_url_kwarg = "product_slug"
 
     def get(self, request, *args, **kwargs):
+        #todo убрать в отдельную функцию?
         if 'recently_viewed' not in request.session:
             request.session['recently_viewed'] = [self.kwargs['product_slug']]
         else:
@@ -147,22 +131,12 @@ class ProductDetailView(generic.DetailView):
             [product.size for product in get_single_product_variations(self.kwargs["product_slug"])]
         context['product_reviews'] = get_single_product_reviews(self.kwargs["product_slug"])
         context['reviews_quantity'] = get_single_product_reviews_quantity(self.kwargs["product_slug"])
-        context['average_rating'] = self.get_average_rating()
+        context['average_rating'] = get_average_rating(self.kwargs["product_slug"])
         ratings_count = get_ratings_count(self.kwargs["product_slug"])
         for rating_count in ratings_count:
             context[f'count_of_{rating_count["rate"]}_star_reviews'] = rating_count['count']
             context[f'percentage_of_{rating_count["rate"]}_star_reviews'] = rating_count['percent']
         return context
-
-    # todo move to helpers?
-    def round_int_custom(self, num, step):
-        return round(num / step) * step
-
-    def get_average_rating(self):
-        average_product_rating = get_single_product_rating(self.kwargs["product_slug"])
-        if not average_product_rating:
-            return None
-        return self.round_int_custom(float(average_product_rating['average']), 0.5)
 
 
 class ProductFormView(SingleObjectMixin, generic.FormView):

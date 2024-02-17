@@ -1,3 +1,4 @@
+from django.contrib.postgres.search import SearchRank
 from django.db.models import Avg, Count, ExpressionWrapper, F, DecimalField
 from django.shortcuts import get_object_or_404
 
@@ -80,3 +81,11 @@ def get_ratings_count(slug):
         .annotate(percent=ExpressionWrapper((F('count') * 100) / get_single_product_reviews_quantity(slug),
                                             output_field=DecimalField()))
     return ratings_count
+
+
+def get_queryset_after_search(queryset, search_vector, search_query):
+    queryset = queryset.annotate(
+        search=search_vector,
+        rank=SearchRank(search_vector, search_query))\
+        .filter(search=search_query)
+    return queryset
