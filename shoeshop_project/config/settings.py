@@ -22,7 +22,6 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 
 CART_SESSION_ID = 'cart'
 
-# убрал 8000
 BACKEND_DOMAIN = "http://localhost"
 
 PAYMENT_SUCCESS_URL = 'http://localhost/success/'
@@ -159,7 +158,7 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
 ]
 
-LOGIN_REDIRECT_URL = '/'
+# LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization

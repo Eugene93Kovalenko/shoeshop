@@ -43,13 +43,13 @@ class CartView(generic.ListView):
 def add_to_cart(request, slug):
     cart = Cart(request)
     if request.POST.get('quantity') == '0' or not request.POST.get('product-size'):
-        messages.warning(request, "Вы должны выбрать размер и количество товара")
+        messages.warning(request, "You have to choose product size and quantity")
         return redirect(request.META.get('HTTP_REFERER'))
     quantity = int(request.POST.get('quantity'))
     size = request.POST.get('product-size')
     product_variation = get_product_variation(slug, size)
     if product_variation.quantity < quantity:
-        messages.warning(request, "На складе нет этого товара в таком количестве")
+        messages.warning(request, "This product is not in stock in this quantity")
         return redirect(request.META.get('HTTP_REFERER'))
     cart.add(product_variation=product_variation, quantity=quantity, user=request.user.username)
     return redirect("orders:cart")
@@ -60,7 +60,7 @@ def remove_from_cart(request, slug):
     cart = Cart(request)
     size = request.POST.get('size')
     product_variation = get_product_variation(slug, size)
-    cart.delete(product_variation=product_variation)
+    cart.delete(product_variation)
     return redirect("orders:cart")
 
 
@@ -88,15 +88,6 @@ class CheckoutFormView(generic.FormView):
         if existing_shipping_address:
             existing_shipping_address.delete()
         new_shipping_address = create_shipping_address(user, form)
-        # shipping_address = ShippingAddress.objects.create(
-        #     user=user,
-        #     country=form.cleaned_data['country'],
-        #     region=form.cleaned_data['region'],
-        #     city=form.cleaned_data['city'],
-        #     zip=form.cleaned_data['zip'],
-        #     address=form.cleaned_data['address'],
-        #     default=True
-        # )
         new_order.shipping_address = new_shipping_address
         new_order.save()
 
@@ -178,7 +169,6 @@ class StripeWebhookView(generic.View):
             return HttpResponse(status=400)
 
         if event["type"] == "checkout.session.completed":
-            print("Payment successful")
             session = stripe.checkout.Session.retrieve(
                 event['data']['object']['id'],
                 expand=['line_items'],
@@ -194,18 +184,11 @@ def _handle_successful_payment(session):
     user_name = session['customer_details']['name']
     amount = session['amount_total']
     user = get_custom_user(user_id)
-
-    # todo убрать?
     update_order_items(user)
-
     order = get_order(user)
-
     update_product_purchases_count_and_quantity_in_stock(order)
-
     update_order(order)
-
     create_payment(session['id'], user, order, amount)
-
     tasks.send_order_conformation_mail.delay(user_name, user_email)
 
 

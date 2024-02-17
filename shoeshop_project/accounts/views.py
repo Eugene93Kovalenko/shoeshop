@@ -1,34 +1,23 @@
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm
-from django.contrib.auth.views import LoginView, PasswordChangeView, PasswordResetView, RedirectURLMixin, \
-    PasswordResetDoneView
-from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth import login
+from django.contrib.auth.views import LoginView, PasswordResetView, PasswordResetConfirmView, PasswordResetCompleteView
+
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, FormView, TemplateView
+from django.views.generic import FormView, TemplateView
 
-from accounts.forms import CustomAuthenticationForm, CustomUserCreationForm, CustomPasswordChangeForm, \
-    CustomPasswordResetForm
+from accounts.forms import CustomAuthenticationForm, CustomUserCreationForm, CustomPasswordResetForm
 
 
-class CustomLoginView(SuccessMessageMixin, LoginView):
+class CustomLoginView(LoginView):
     form_class = CustomAuthenticationForm
-    success_message = 'You have successfully logged in!'
-
-    def get_success_url(self):
-        return self.request.POST['return_to']
+    template_name = 'accounts/login.html'
+    success_url = reverse_lazy("products:home")
 
 
-class RegisterView(SuccessMessageMixin, FormView):
+class RegisterView(FormView):
     form_class = CustomUserCreationForm
-    template_name = 'registration/registration.html'
-    success_message = 'You have successfully signed up!'
-
-    #todo
-    def get_success_url(self):
-        if 'login' in self.request.POST['return_to']:
-            return reverse_lazy("products:home")
-        return self.request.POST['return_to']
+    template_name = 'accounts/registration.html'
+    success_url = reverse_lazy("products:home")
 
     def form_valid(self, form):
         user = form.save()
@@ -42,19 +31,21 @@ class RegisterView(SuccessMessageMixin, FormView):
         return super(RegisterView, self).get(request, *args, **kwargs)
 
 
-# class CustomPasswordChangeView(PasswordChangeView):
-#     form_class = CustomPasswordChangeForm
-#     success_url = reverse_lazy("accounts:password-change-done")
-#     template_name = 'registration/password_change.html'
-
-
 class CustomPasswordResetView(PasswordResetView):
     form_class = CustomPasswordResetForm
+    template_name = 'accounts/password_reset_form.html'
+    email_template_name = 'accounts/password_reset_email.html'
     success_url = reverse_lazy("accounts:password-reset-done")
-    template_name = 'registration/password_reset.html'
 
 
 class CustomPasswordResetDoneView(TemplateView):
-    # form_class = CustomPasswordResetForm
-    # success_url = reverse_lazy("accounts:password-reset-done")
-    template_name = "registration/password_reset_confirmation.html"
+    template_name = "accounts/password_reset_done.html"
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = "accounts/password_reset_confirm.html"
+    success_url = reverse_lazy("accounts:password-reset-complete")
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = "accounts/password_reset_complete.html"
