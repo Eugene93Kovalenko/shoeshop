@@ -1,7 +1,5 @@
 from decimal import Decimal
 
-from django.shortcuts import get_object_or_404
-
 from config import settings
 from products.models import ProductVariation
 
@@ -31,14 +29,9 @@ class Cart:
     def add(self, product_variation, quantity, user):
         product_variation_id = str(product_variation.id)
         if product_variation_id not in self.cart:
-            if product_variation.product.discount_price:
-                self.cart[product_variation_id] = {'quantity': quantity,
-                                                   'price': str(product_variation.product.discount_price),
-                                                   'user': user}
-            else:
-                self.cart[product_variation_id] = {'quantity': quantity,
-                                                   'price': str(product_variation.product.price),
-                                                   'user': user}
+            self.cart[product_variation_id] = {'quantity': quantity,
+                                               'price': str(product_variation.product.get_actual_price),
+                                               'user': user}
         else:
             self.cart[product_variation_id]['quantity'] += quantity
         self.save()

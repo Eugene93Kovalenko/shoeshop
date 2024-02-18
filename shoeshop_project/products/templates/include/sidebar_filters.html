@@ -41,8 +41,8 @@
                         <ul>
                             {% for size in sizes_list %}
                             <label class="checkbox-btn">
-                                <input type="checkbox" {% if size.name in selected_size %} checked {% endif %}
-                                       name="size" value="{{ size }}">
+                                <input type="checkbox" name="size" value="{{ size }}"
+                                       {% if size.name in selected_size %} checked {% endif %}>
                                 <span>{{ size.name }}</span>
                             </label>
                             {% endfor %}

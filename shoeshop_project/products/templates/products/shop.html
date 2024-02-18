@@ -19,8 +19,8 @@
                             </a>
                             <div class="desc">
                                 <h2><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h2>
-                                {% if product.discount_price %}
-                                <h6>${{ product.discount_price }}
+                                {% if product.discount %}
+                                <h6>${{ product.get_discount_price }}
                                     <del class="text-muted ml-2">${{ product.price }}</del>
                                 </h6>
                                 {% else %}
@@ -43,39 +43,39 @@
 {% endblock content %}
 
 
-<script>
-  // for getting the sorting status to be displayed in sorting dropdown placeholder
-  function get(name) {
-    if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))  //location.search give query sling part
-      return decodeURIComponent(name[1]);
-  }
+<!--<script>-->
+<!--  // for getting the sorting status to be displayed in sorting dropdown placeholder-->
+<!--  function get(name) {-->
+<!--    if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search))  //location.search give query sling part-->
+<!--      return decodeURIComponent(name[1]);-->
+<!--  }-->
 
-  if(get('ordering'))
-  document.getElementById('placeholder').innerHTML = "Sort: " + document.getElementById(get('ordering')).innerHTML;
+<!--  if(get('ordering'))-->
+<!--  document.getElementById('placeholder').innerHTML = "Sort: " + document.getElementById(get('ordering')).innerHTML;-->
 
-<!--  if(get('price'))-->
-<!--  document.getElementById('price-placeholder').innerHTML = "Price: " + document.getElementById('pr'+get('price')).innerHTML;-->
-
-
-  // for getting url after applying ordering
-  function finalurl() {
-    var url = new URL(window.location.href);
-    var search_params = url.searchParams;
-    search_params.set('ordering', document.getElementById("sort-list").value);
-    url.search = search_params.toString();
-    var new_url = url.toString();
-    return new_url
-  }
-
-  // for getting url after applying price filtering
-  function finalurl2() {
-    var url = new URL(window.location.href);
-    var search_params = url.searchParams;
-    search_params.set('price', document.getElementById("price-list").value);
-    url.search = search_params.toString();
-    var new_url = url.toString();
-    return new_url
-  }
+<!--&lt;!&ndash;  if(get('price'))&ndash;&gt;-->
+<!--&lt;!&ndash;  document.getElementById('price-placeholder').innerHTML = "Price: " + document.getElementById('pr'+get('price')).innerHTML;&ndash;&gt;-->
 
 
-</script>
+<!--  // for getting url after applying ordering-->
+<!--  function finalurl() {-->
+<!--    var url = new URL(window.location.href);-->
+<!--    var search_params = url.searchParams;-->
+<!--    search_params.set('ordering', document.getElementById("sort-list").value);-->
+<!--    url.search = search_params.toString();-->
+<!--    var new_url = url.toString();-->
+<!--    return new_url-->
+<!--  }-->
+
+<!--  // for getting url after applying price filtering-->
+<!--  function finalurl2() {-->
+<!--    var url = new URL(window.location.href);-->
+<!--    var search_params = url.searchParams;-->
+<!--    search_params.set('price', document.getElementById("price-list").value);-->
+<!--    url.search = search_params.toString();-->
+<!--    var new_url = url.toString();-->
+<!--    return new_url-->
+<!--  }-->
+
+
+<!--</script>-->

@@ -108,7 +108,6 @@ class ProductDetailView(generic.DetailView):
     slug_url_kwarg = "product_slug"
 
     def get(self, request, *args, **kwargs):
-        #todo убрать в отдельную функцию?
         if 'recently_viewed' not in request.session:
             request.session['recently_viewed'] = [self.kwargs['product_slug']]
         else:

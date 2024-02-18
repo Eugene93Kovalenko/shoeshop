@@ -22,8 +22,8 @@
                     <div class="product-desc">
                         <h3>{{ product.name }}</h3>
                         <p class="price">
-                            {% if product.discount_price %}
-                        <h6>${{ product.discount_price }}
+                            {% if product.discount %}
+                        <h6>${{ product.get_discount_price }}
                             <del class="text-muted ml-2">${{ product.price }}</del>
                         </h6>
                         {% else %}
