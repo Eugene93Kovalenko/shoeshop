@@ -1,3 +1,5 @@
+import time
+
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.utils import timezone
 
@@ -70,10 +72,10 @@ class ShopView(generic.ListView):
         context['categories_list'] = get_all_categories()
         context['colors_list'] = get_all_colors()
         context['selected_ordering'] = self.request.GET.get('ordering')
-        context['selected_brand'] = [brand for brand in self.request.GET.getlist('brand')]
+        context['selected_brand'] = self.request.GET.getlist('brand')
         context['selected_size'] = [int(size) for size in self.request.GET.getlist('size')]
-        context['selected_category'] = [brand for brand in self.request.GET.getlist('category')]
-        context['selected_color'] = [brand for brand in self.request.GET.getlist('color')]
+        context['selected_category'] = self.request.GET.getlist('category')
+        context['selected_color'] = self.request.GET.getlist('color')
         return context
 
 
@@ -124,14 +126,14 @@ class ProductDetailView(generic.DetailView):
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
+        slug = self.kwargs["product_slug"]
         context["form"] = ReviewForm()
-        context["product_images"] = get_single_product_images(self.kwargs["product_slug"])
-        context['list_of_product_sizes'] = \
-            [product.size for product in get_single_product_variations(self.kwargs["product_slug"])]
-        context['product_reviews'] = get_single_product_reviews(self.kwargs["product_slug"])
-        context['reviews_quantity'] = get_single_product_reviews_quantity(self.kwargs["product_slug"])
-        context['average_rating'] = get_average_rating(self.kwargs["product_slug"])
-        ratings_count = get_ratings_count(self.kwargs["product_slug"])
+        context["product_images"] = get_single_product_images(slug)
+        context['list_of_product_sizes'] = [product.size for product in get_single_product_variations(slug)]
+        context['product_reviews'] = get_single_product_reviews(slug)
+        context['reviews_quantity'] = get_single_product_reviews_quantity(slug)
+        context['average_rating'] = get_average_rating(slug)
+        ratings_count = get_ratings_count(slug)
         for rating_count in ratings_count:
             context[f'count_of_{rating_count["rate"]}_star_reviews'] = rating_count['count']
             context[f'percentage_of_{rating_count["rate"]}_star_reviews'] = rating_count['percent']
@@ -175,9 +177,6 @@ class ContactView(generic.FormView):
     template_name = "products/contact.html"
     form_class = ContactForm
 
-    def get_success_url(self):
-        return reverse('products:home')
-
     def form_valid(self, form):
         first_name = form.cleaned_data['first_name']
         last_name = form.cleaned_data['last_name']
@@ -187,6 +186,9 @@ class ContactView(generic.FormView):
 
         tasks.send_email_from_contact_form.delay(first_name, last_name, sender, subject, message)
         return super(ContactView, self).form_valid(form)
+
+    def get_success_url(self):
+        return reverse('products:home')
 
 
 class AboutView(generic.TemplateView):

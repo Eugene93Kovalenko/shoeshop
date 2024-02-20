@@ -24,7 +24,8 @@ def get_all_sizes():
 
 
 def get_all_categories():
-    return Category.objects.all()
+    # faster
+    return Category.objects.all().values('name')
 
 
 def get_all_colors():
@@ -33,9 +34,6 @@ def get_all_colors():
 
 def get_ordering_option():
     return Product.ORDERING_OPTIONS
-
-
-
 
 
 def get_product_from_slug(slug):
