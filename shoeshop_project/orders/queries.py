@@ -84,3 +84,38 @@ def update_order(order):
     order.ordered_datetime = ordered_datetime
     order.ordered = True
     order.save()
+
+
+def delete_existing_order(user):
+    existing_order = get_order(user)
+    if existing_order:
+        existing_order.delete()
+        existing_order_items = get_order_items(user)
+        for item in existing_order_items:
+            item.delete()
+
+
+def add_order_items_in_order(cart, order, user):
+    for item in cart:
+        order_item = create_order_item(user, item['product_variation'], item['quantity'])
+        order.products.add(order_item)
+
+
+def delete_existing_shipping_address(user):
+    existing_shipping_address = get_shipping_address(user)
+    if existing_shipping_address:
+        existing_shipping_address.delete()
+
+
+def create_new_shipping_address(user, form, order):
+    new_shipping_address = create_shipping_address(user, form)
+    order.shipping_address = new_shipping_address
+    order.save()
+
+
+def update_user_info(user, form):
+    user.first_name = form.cleaned_data['first_name']
+    user.last_name = form.cleaned_data['last_name']
+    user.phone = form.cleaned_data['phone']
+    user.save()
+

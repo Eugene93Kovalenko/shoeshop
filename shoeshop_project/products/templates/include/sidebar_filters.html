@@ -25,7 +25,7 @@
                     <div class="form-check">
                         <input class="form-check-input" {% if brand.name in selected_brand %} checked {% endif %}
                                type="checkbox" value="{{ brand.name }}"
-                               id="brand-{{ forloop.counter0 }}" name="brand">
+                               id="brand-{{ forloop.counter0 }}" name="brands">
                         <label class="form-check-label" for="brand-{{ forloop.counter0 }}"> {{ brand.name }}</label>
                     </div>
                     {% endfor %}
@@ -41,7 +41,7 @@
                         <ul>
                             {% for size in sizes_list %}
                             <label class="checkbox-btn">
-                                <input type="checkbox" name="size" value="{{ size }}"
+                                <input type="checkbox" name="sizes" value="{{ size }}"
                                        {% if size.name in selected_size %} checked {% endif %}>
                                 <span>{{ size.name }}</span>
                             </label>
@@ -60,7 +60,7 @@
                     <div class="form-check">
                         <input class="form-check-input" {% if color.name in selected_color %} checked {% endif %}
                                type="checkbox" value="{{ color }}"
-                               id="color-{{ forloop.counter0 }}" name="color">
+                               id="color-{{ forloop.counter0 }}" name="colors">
                         <label class="form-check-label" for="color-{{ forloop.counter0 }}">
                             {{ color }}
                         </label>
@@ -79,7 +79,7 @@
                         <div class="form-check">
                             <input {% if category.name in selected_category %} checked {% endif %}
                                    class="form-check-input" type="checkbox" value="{{ category.name }}"
-                                   id="category-{{ forloop.counter0 }}" name="category">
+                                   id="category-{{ forloop.counter0 }}" name="categories">
                             <label class="form-check-label" for="category-{{ forloop.counter0 }}">
                                 {{ category.name }}
                             </label>

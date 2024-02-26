@@ -74,7 +74,7 @@
                             <input type="hidden" name="size" value="{{ item.product_variation.size }}">
                             <div class="one-eight text-center">
                                 <div class="display-tc">
-                                    <button type="button" class="closed"></button>
+                                    <button class="closed"></button>
 <!--                                    <button type="button" class="closed"></button>-->
 <!--                                    <button type="button" class="close" aria-label="Close">-->
 <!--                                      <span aria-hidden="true">&times;</span>-->
@@ -154,13 +154,13 @@
                         </a>
                         <div class="desc">
                             <h2><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h2>
-<!--                            {% if product.discount_price %}-->
-<!--                            <h6>${{ product.discount_price }}-->
-<!--                                <del class="text-muted ml-2">${{ product.price }}</del>-->
-<!--                            </h6>-->
-<!--                            {% else %}-->
-                            <h6>${{ product.get_final_price }}</h6>
-<!--                            {% endif %}-->
+                                {% if product.discount %}
+                                <h6>${{ product.get_discount_price }}
+                                    <del class="text-muted ml-2">${{ product.price }}</del>
+                                </h6>
+                                {% else %}
+                                <h6>${{ product.price }}</h6>
+                                {% endif %}
                         </div>
                     </div>
                 </div>

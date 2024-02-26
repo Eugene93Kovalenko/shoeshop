@@ -2,6 +2,8 @@
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
+
+from django.urls import reverse_lazy, reverse
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -22,7 +24,7 @@ STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
-DEBUG = os.getenv('DEBUG', True)
+DEBUG = os.getenv('DEBUG', False)
 
 # INTERNAL_IPS = [
 # '127.0.0.1',
@@ -65,16 +67,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.postgres',
 
-    'products',
-    'accounts',
-    'orders',
-
-    'django_filters',
     'django_countries',
-    'crispy_forms',
     'debug_toolbar',
     'django_celery_beat',
     'dynamic_breadcrumbs',
+
+    'products',
+    'accounts',
+    'orders',
 ]
 
 MIDDLEWARE = [
@@ -112,7 +112,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
@@ -124,18 +123,27 @@ DATABASES = {
     }
 }
 
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://redis:6379",
+        'OPTIONS': {
+            'db': '1',
+        }
+    }
+}
+
 # CACHES = {
 #     "default": {
-#         "BACKEND": "django.core.cache.backends.redis.RedisCache",
-#         "LOCATION": "redis://redis:6379",
-#         'OPTIONS': {
-#             'db': '1',
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://redis:6379/1",
+#         "OPTIONS": {
+#             "db": "1",
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
 #         }
 #     }
 # }
 
-
-# Password validation
 
 # AUTH_PASSWORD_VALIDATORS = [
 #     {
@@ -159,7 +167,6 @@ LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
 # Internationalization
-
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
@@ -172,7 +179,6 @@ STATICFILES_DIRS = []
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
-
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Media
@@ -196,18 +202,50 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 EMAIL_ADMIN = EMAIL_HOST_USER
 
-# LOGGING = {
-#     "version": 1,
-#     "disable_existing_loggers": False,
-#     "handlers": {
-#         "console": {
-#             "class": "logging.StreamHandler",
-#         },
-#     },
-#     "loggers": {
-#         'django.db.backends': {
-#             "handlers": ["console"],
-#             "level": "DEBUG",
-#         }
-#     }
-# }
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+
+    'formatters': {
+        'main': {
+            'format': '{asctime} - {levelname} - {module} - {filename} - {message}',
+            'style': '{'
+        },
+        'debug': {
+            'format': '{levelname} - {filename} - {message}',
+            'style': '{'
+        },
+    },
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            'formatter': 'main',
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            'formatter': 'main',
+            'filename': 'info.log',
+        },
+    },
+    "loggers": {
+        'main': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'debug': {
+            "handlers": ["console"],
+            "level": "DEBUG",
+        },
+        # 'django': {
+        #     'handlers': ['file'],
+        #     'propagate': True,
+        #     'level': 'INFO',
+        # },
+        # 'django.request': {
+        #     'handlers': ['file'],
+        #     'level': 'ERROR',
+        #     'propagate': False,
+        # },
+    }
+}

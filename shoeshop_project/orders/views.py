@@ -1,4 +1,5 @@
 import stripe
+import logging
 from django.contrib import messages
 from django.http import HttpResponse
 from django.shortcuts import redirect
@@ -9,9 +10,20 @@ from django.views.decorators.csrf import csrf_exempt
 from orders.cart import Cart
 from orders.forms import CheckoutForm
 from orders.models import *
-from .queries import get_order, get_recently_viewed_products, get_order_items, get_product_variation, \
-    create_order, create_order_item, get_shipping_address, create_shipping_address
+from .queries import \
+    get_order, \
+    get_recently_viewed_products, \
+    get_order_items, \
+    get_product_variation, \
+    create_order, \
+    create_order_item, \
+    get_shipping_address, \
+    create_shipping_address, delete_existing_order, add_order_items_in_order, delete_existing_shipping_address, \
+    update_user_info
 from .services import get_metadata, get_line_items_list, handle_successful_payment
+
+
+logger = logging.getLogger('main')
 
 
 class CartView(generic.ListView):
@@ -41,7 +53,7 @@ class AddToCart(generic.View):
         if product_variation.quantity < quantity:
             messages.warning(request, "This product is not in stock in this quantity")
             return redirect(request.META.get('HTTP_REFERER'))
-        cart.add(product_variation=product_variation, quantity=quantity, user=request.user.username)
+        cart.add(product_variation=product_variation, quantity=quantity, user=self.request.user.email)
         return redirect("orders:cart")
 
 
@@ -51,6 +63,7 @@ class RemoveFromCart(generic.View):
         size = request.POST.get('size')
         product_variation = get_product_variation(slug, size)
         cart.delete(product_variation)
+        logger.info(f'{product_variation} удален из корзины')
         return redirect("orders:cart")
 
 
@@ -64,27 +77,17 @@ class CheckoutFormView(generic.FormView):
     def form_valid(self, form):
         cart = Cart(self.request)
         user = self.request.user
-        existing_order = get_order(user)
-        if existing_order:
-            existing_order.delete()
-            existing_order_items = get_order_items(user)
-            for item in existing_order_items:
-                item.delete()
+
+        delete_existing_order(user)
         new_order = create_order(user)
-        for item in cart:
-            order_item = create_order_item(user, item['product_variation'], item['quantity'])
-            new_order.products.add(order_item)
-        existing_shipping_address = get_shipping_address(user)
-        if existing_shipping_address:
-            existing_shipping_address.delete()
+        add_order_items_in_order(cart, new_order, user)
+
+        delete_existing_shipping_address(user)
         new_shipping_address = create_shipping_address(user, form)
         new_order.shipping_address = new_shipping_address
         new_order.save()
 
-        user.first_name = form.cleaned_data['first_name']
-        user.last_name = form.cleaned_data['last_name']
-        user.phone = form.cleaned_data['phone']
-        user.save()
+        update_user_info(user, form)
         return super(CheckoutFormView, self).form_valid(form)
 
 
@@ -101,6 +104,7 @@ class CreateStripeCheckoutSessionView(generic.View):
             success_url=settings.PAYMENT_SUCCESS_URL,
             cancel_url=settings.PAYMENT_CANCEL_URL,
         )
+        # todo редиректить на прпомежуточную вьюху?
         return redirect(checkout_session.url)
 
 

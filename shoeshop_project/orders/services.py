@@ -43,7 +43,6 @@ def get_line_items_list(request):
     return line_items_list
 
 
-# todo tomic
 def handle_successful_payment(session):
     user_id = session['client_reference_id']
     user_email = session['customer_details']['email']
@@ -52,6 +51,7 @@ def handle_successful_payment(session):
     user = get_custom_user(user_id)
     update_order_items(user)
     order = get_order(user)
+    # todo atomic
     update_product_purchases_count_and_quantity_in_stock(order)
     update_order(order)
     create_payment(session['id'], user, order, amount)
