@@ -3,9 +3,10 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 import os
 
-from django.urls import reverse_lazy, reverse
 from dotenv import load_dotenv
 from pathlib import Path
+
+from config.logging import CustomJsonFormatter
 
 load_dotenv()
 
@@ -211,6 +212,9 @@ LOGGING = {
             'format': '{asctime} - {levelname} - {module} - {filename} - {message}',
             'style': '{'
         },
+        'json': {
+            '()': CustomJsonFormatter,
+        },
         'debug': {
             'format': '{levelname} - {filename} - {message}',
             'style': '{'
@@ -223,7 +227,7 @@ LOGGING = {
         },
         "file": {
             "class": "logging.FileHandler",
-            'formatter': 'main',
+            'formatter': 'json',
             'filename': 'info.log',
         },
     },
@@ -237,15 +241,101 @@ LOGGING = {
             "handlers": ["console"],
             "level": "DEBUG",
         },
-        # 'django': {
-        #     'handlers': ['file'],
-        #     'propagate': True,
-        #     'level': 'INFO',
-        # },
-        # 'django.request': {
-        #     'handlers': ['file'],
-        #     'level': 'ERROR',
-        #     'propagate': False,
-        # },
     }
 }
+
+
+
+
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "root": {"level": "INFO", "handlers": ["default"]},
+#     "formatters": {
+#         "django.server": {
+#             "()": "django.utils.log.ServerFormatter",
+#             "format": "[{server_time}] {message}",
+#             "style": "{",
+#         },
+#         "json": {
+#             "()": "saleor.core.logging.JsonFormatter",
+#             "datefmt": "%Y-%m-%dT%H:%M:%SZ",
+#             "format": (
+#                 "%(asctime)s %(levelname)s %(lineno)s %(message)s %(name)s "
+#                 + "%(pathname)s %(process)d %(threadName)s"
+#             ),
+#         },
+#         "celery_json": {
+#             "()": "saleor.core.logging.JsonCeleryFormatter",
+#             "datefmt": "%Y-%m-%dT%H:%M:%SZ",
+#             "format": (
+#                 "%(asctime)s %(levelname)s %(celeryTaskId)s %(celeryTaskName)s "
+#             ),
+#         },
+#         "celery_task_json": {
+#             "()": "saleor.core.logging.JsonCeleryTaskFormatter",
+#             "datefmt": "%Y-%m-%dT%H:%M:%SZ",
+#             "format": (
+#                 "%(asctime)s %(levelname)s %(celeryTaskId)s %(celeryTaskName)s "
+#                 "%(message)s "
+#             ),
+#         },
+#         "verbose": {
+#             "format": (
+#                 "%(asctime)s %(levelname)s %(name)s %(message)s "
+#                 "[PID:%(process)d:%(threadName)s]"
+#             )
+#         },
+#     },
+#     "handlers": {
+#         "default": {
+#             "level": "DEBUG",
+#             "class": "logging.StreamHandler",
+#             "formatter": "verbose" if DEBUG else "json",
+#         },
+#         "django.server": {
+#             "level": "INFO",
+#             "class": "logging.StreamHandler",
+#             "formatter": "django.server" if DEBUG else "json",
+#         },
+#         "celery_app": {
+#             "level": "INFO",
+#             "class": "logging.StreamHandler",
+#             "formatter": "verbose" if DEBUG else "celery_json",
+#         },
+#         "celery_task": {
+#             "level": "INFO",
+#             "class": "logging.StreamHandler",
+#             "formatter": "verbose" if DEBUG else "celery_task_json",
+#         },
+#         "null": {
+#             "class": "logging.NullHandler",
+#         },
+#     },
+#     "loggers": {
+#         "django": {"level": "INFO", "propagate": True},
+#         "django.server": {
+#             "handlers": ["django.server"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#         "celery.app.trace": {
+#             "handlers": ["celery_app"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#         "celery.task": {
+#             "handlers": ["celery_task"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#         "saleor": {"level": "DEBUG", "propagate": True},
+#         "saleor.graphql.errors.handled": {
+#             "handlers": ["default"],
+#             "level": "INFO",
+#             "propagate": False,
+#         },
+#         "graphql.execution.utils": {"propagate": False, "handlers": ["null"]},
+#         "graphql.execution.executor": {"propagate": False, "handlers": ["null"]},
+#     },
+# }

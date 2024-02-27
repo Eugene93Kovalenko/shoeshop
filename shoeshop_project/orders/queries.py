@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
@@ -5,6 +7,8 @@ from accounts.models import CustomUser
 from orders.models import Payment, OrderItem, Order, ShippingAddress
 from products.models import Product, ProductVariation
 
+
+logger = logging.getLogger('main')
 
 def get_recently_viewed_products(session):
     return Product.objects.filter(slug__in=session).order_by('-last_visit')[:4]
@@ -31,8 +35,8 @@ def create_order_item(user, product_variation, quantity):
 
 
 def create_order(user):
-    ordered_datetime = timezone.now()
-    return Order.objects.create(user=user, ordered_datetime=ordered_datetime, ordered=False)
+    order_datetime = timezone.now()
+    return Order.objects.create(user=user, ordered_datetime=order_datetime, ordered=False)
 
 
 def create_payment(session_id, user, order, amount):
@@ -61,10 +65,19 @@ def get_order(user):
         return Order.objects.get(user=user, ordered=False)
     except Order.DoesNotExist:
         return None
+    except Order.MultipleObjectsReturned:
+        logger.error('Multiple objects returned. There should be only 1 order per user with field ordered=False')
+        return None
 
 
 def get_shipping_address(user):
-    return ShippingAddress.objects.filter(user=user)
+    try:
+        return ShippingAddress.objects.get(user=user)
+    except Order.DoesNotExist:
+        return None
+    except Order.MultipleObjectsReturned:
+        logger.error('Multiple objects returned. There should be only 1 shipping address per user')
+        return None
 
 
 def create_shipping_address(user, form):
@@ -95,7 +108,7 @@ def delete_existing_order(user):
             item.delete()
 
 
-def add_order_items_in_order(cart, order, user):
+def add_order_items_to_order(cart, order, user):
     for item in cart:
         order_item = create_order_item(user, item['product_variation'], item['quantity'])
         order.products.add(order_item)

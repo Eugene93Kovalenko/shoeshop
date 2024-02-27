@@ -6,7 +6,7 @@
 <div id="page">
     <div class="colorlib-product">
         <div class="container">
-            <form method="POST">
+            <form action="{% url 'orders:create-checkout-session' %}" method="POST">
                 {% csrf_token %}
                 <div class="row">
                     <div class="col-lg-8">
@@ -102,19 +102,13 @@
                                     <div class="form-group">
                                         <div class="col-md-12">
                                             <div class="radio">
-                                                <!--<label><input type="radio" name="payment_method" value="stripe">-->
                                                 <label> {{ form.payment_method }} Stripe </label>
-
                                             </div>
                                         </div>
                                     </div>
                                     <div class="form-group">
                                         <div class="col-md-12">
                                             <div class="checkbox">
-                                                <!--                                            <label><input type="checkbox" value="accept">-->
-                                                <!--                                                I have read and accept the terms and conditions-->
-                                                <!--                                            </label>-->
-
                                                 <label> {{ form.accept_terms }}
                                                     I have read and accept the terms and conditions
                                                 </label>

@@ -26,12 +26,12 @@ class Cart:
             item['total'] = item['price'] * item['quantity']
             yield item
 
-    def add(self, product_variation, quantity, user):
+    def add(self, product_variation, quantity, user=None):
         product_variation_id = str(product_variation.id)
         if product_variation_id not in self.cart:
             self.cart[product_variation_id] = {'quantity': quantity,
                                                'price': str(product_variation.product.get_actual_price),
-                                               'user': user}
+                                               'user_id': user}
         else:
             self.cart[product_variation_id]['quantity'] += quantity
         self.save()

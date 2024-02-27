@@ -14,7 +14,7 @@ def get_average_rating(slug):
 
 def update_recently_viewed_session(session, slug):
     if 'recently_viewed' not in session:
-        session['recently_viewed'] = slug
+        session['recently_viewed'] = [slug]
     else:
         if slug in session['recently_viewed']:
             session['recently_viewed'].remove(slug)

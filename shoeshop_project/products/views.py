@@ -1,15 +1,11 @@
 import logging
-import time
 
-from django.contrib.auth.decorators import login_required
 from django.contrib.postgres.search import SearchVector, SearchQuery
-from django.urls import reverse_lazy
 from django.utils import timezone
 
 from django.db.models import Q
 from django.shortcuts import get_object_or_404, redirect
 from django.views import generic
-from django.views.generic.detail import SingleObjectMixin
 
 from .forms import ContactForm, ReviewForm
 from .models import *
@@ -22,7 +18,7 @@ from .services import get_average_rating, update_recently_viewed_session, get_or
     get_brands_list_from_request, get_sizes_list_from_request, get_categories_list_from_request, \
     get_colors_list_from_request
 
-logger = logging.getLogger('debug')
+logger = logging.getLogger(__name__)
 
 
 class HomeView(generic.ListView):
@@ -31,6 +27,7 @@ class HomeView(generic.ListView):
     context_object_name = "products"
 
     def get_queryset(self):
+        print(__name__)
         return get_all_products()[:8]
 
 
@@ -121,7 +118,7 @@ class ProductDetailView(generic.DetailView):
     slug_url_kwarg = "product_slug"
 
     def get(self, request, *args, **kwargs):
-        update_recently_viewed_session(request.session, self.kwargs['product_slug'])
+        update_recently_viewed_session(self.request.session, self.kwargs['product_slug'])
         current_product = get_product_from_slug(self.kwargs["product_slug"])
         current_product.last_visit = timezone.now()
         current_product.save()

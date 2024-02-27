@@ -1,6 +1,7 @@
 import stripe
 import logging
 from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
@@ -11,14 +12,10 @@ from orders.cart import Cart
 from orders.forms import CheckoutForm
 from orders.models import *
 from .queries import \
-    get_order, \
     get_recently_viewed_products, \
-    get_order_items, \
     get_product_variation, \
     create_order, \
-    create_order_item, \
-    get_shipping_address, \
-    create_shipping_address, delete_existing_order, add_order_items_in_order, delete_existing_shipping_address, \
+    create_shipping_address, delete_existing_order, add_order_items_to_order, delete_existing_shipping_address, \
     update_user_info
 from .services import get_metadata, get_line_items_list, handle_successful_payment
 
@@ -53,7 +50,7 @@ class AddToCart(generic.View):
         if product_variation.quantity < quantity:
             messages.warning(request, "This product is not in stock in this quantity")
             return redirect(request.META.get('HTTP_REFERER'))
-        cart.add(product_variation=product_variation, quantity=quantity, user=self.request.user.email)
+        cart.add(product_variation=product_variation, quantity=quantity, user=self.request.user.id)
         return redirect("orders:cart")
 
 
@@ -63,7 +60,7 @@ class RemoveFromCart(generic.View):
         size = request.POST.get('size')
         product_variation = get_product_variation(slug, size)
         cart.delete(product_variation)
-        logger.info(f'{product_variation} удален из корзины')
+        # logger.info(f'{product_variation} deleted from cart')
         return redirect("orders:cart")
 
 
@@ -71,16 +68,14 @@ class CheckoutFormView(generic.FormView):
     template_name = "orders/checkout.html"
     form_class = CheckoutForm
 
-    def get_success_url(self):
-        return reverse('orders:create-checkout-session')
-
+    @transaction.atomic
     def form_valid(self, form):
         cart = Cart(self.request)
         user = self.request.user
 
         delete_existing_order(user)
         new_order = create_order(user)
-        add_order_items_in_order(cart, new_order, user)
+        add_order_items_to_order(cart, new_order, user)
 
         delete_existing_shipping_address(user)
         new_shipping_address = create_shipping_address(user, form)
@@ -94,7 +89,7 @@ class CheckoutFormView(generic.FormView):
 class CreateStripeCheckoutSessionView(generic.View):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    def get(self, request):
+    def post(self, request):
         checkout_session = stripe.checkout.Session.create(
             client_reference_id=request.user.id,
             payment_method_types=['card'],
@@ -104,7 +99,6 @@ class CreateStripeCheckoutSessionView(generic.View):
             success_url=settings.PAYMENT_SUCCESS_URL,
             cancel_url=settings.PAYMENT_CANCEL_URL,
         )
-        # todo редиректить на прпомежуточную вьюху?
         return redirect(checkout_session.url)
 
 
@@ -118,10 +112,10 @@ class StripeWebhookView(generic.View):
         try:
             event = stripe.Webhook.construct_event(payload, sig_header, endpoint_secret)
         except ValueError as e:
-            # Invalid payload
+            logger.error('Invalid payload')
             return HttpResponse(status=400)
         except stripe.error.SignatureVerificationError as e:
-            # Invalid signature
+            logger.error('Invalid signature')
             return HttpResponse(status=400)
         if event["type"] == "checkout.session.completed":
             session = stripe.checkout.Session.retrieve(
