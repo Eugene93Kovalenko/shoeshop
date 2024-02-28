@@ -1,8 +1,3 @@
-from decimal import Decimal
-
-from django.contrib.postgres.fields import ArrayField
-from django.contrib.postgres.search import SearchVectorField
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
@@ -72,8 +67,8 @@ class Size(models.Model):
 
 class Product(models.Model):
     ORDERING_OPTIONS = [
-        ('Popularity', '-purchases_count'),
-        ('Last', '-created_at'),
+        ('Popularity', '-popularity'),
+        ('Last', '-last'),
         ('Price high first', '-price'),
         ('Price low first', 'price')
     ]
@@ -83,6 +78,7 @@ class Product(models.Model):
     discount = models.PositiveIntegerField(
         default=0, blank=True, validators=[MinValueValidator(0), MaxValueValidator(99)]
     )
+    actual_price = models.DecimalField(max_digits=7, decimal_places=2)
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
     gender = models.ForeignKey(Gender, on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
@@ -109,16 +105,16 @@ class Product(models.Model):
     def get_gender_url(self):
         return reverse("products:gender", kwargs={"gender_slug": self.gender.name})
 
-    @property
-    def get_discount_price(self):
-        return round(self.price - ((self.price * self.discount) / 100), 2)
+    # @property
+    # def get_discount_price(self):
+    #     return round(self.price - ((self.price * self.discount) / 100), 2)
 
-    @property
-    def get_actual_price(self):
-        if self.discount:
-            return self.get_discount_price
-        else:
-            return self.price
+    # @property
+    # def get_actual_price(self):
+    #     if self.discount:
+    #         return self.get_discount_price
+    #     else:
+    #         return self.price
 
     class Meta:
         verbose_name = "Product"

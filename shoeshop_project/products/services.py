@@ -25,7 +25,15 @@ def update_recently_viewed_session(session, slug):
 
 
 def get_ordering_from_request(request):
-    return request.GET.get('ordering', '')
+    ordering = request.GET.get('ordering', '')
+    if ordering == '-purchases_count':
+        return '-product__popularity'
+    elif ordering == '-created_at':
+        return '-product__last'
+    elif ordering == '-price':
+        return '-product__actual_price'
+    elif ordering == 'price':
+        return 'product__actual_price'
 
 
 def get_brands_list_from_request(request):

@@ -10,6 +10,7 @@ from products.models import Product, ProductVariation
 
 logger = logging.getLogger('main')
 
+
 def get_recently_viewed_products(session):
     return Product.objects.filter(slug__in=session).order_by('-last_visit')[:4]
 

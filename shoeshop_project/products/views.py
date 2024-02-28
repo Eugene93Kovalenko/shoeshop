@@ -10,10 +10,10 @@ from django.views import generic
 from .forms import ContactForm, ReviewForm
 from .models import *
 from . import tasks
-from .queries import get_all_products, get_filtered_products, get_all_categories, get_all_sizes, get_all_brands, \
+from .queries import get_filtered_products, get_all_categories, get_all_sizes, get_all_brands, \
     get_all_colors, get_ordering_option, get_product_from_slug, get_single_product_images, \
     get_single_product_variations, get_single_product_reviews, get_single_product_reviews_quantity, \
-    create_product_review, get_ratings_count, get_queryset_after_search
+    create_product_review, get_ratings_count, get_queryset_after_search, get_all_images
 from .services import get_average_rating, update_recently_viewed_session, get_ordering_from_request, \
     get_brands_list_from_request, get_sizes_list_from_request, get_categories_list_from_request, \
     get_colors_list_from_request
@@ -24,18 +24,39 @@ logger = logging.getLogger(__name__)
 class HomeView(generic.ListView):
     model = Product
     template_name = "products/index.html"
-    context_object_name = "products"
+    context_object_name = "images"
 
     def get_queryset(self):
-        print(__name__)
-        return get_all_products()[:8]
+        return get_all_images()
 
 
 class ShopView(generic.ListView):
     model = Product
     template_name = "products/shop.html"
-    context_object_name = "products"
-    paginate_by = 2
+    # context_object_name = "products"
+    context_object_name = "images"
+    paginate_by = 4
+
+    # def get_filters(self):
+    #     brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
+    #
+    #     brands = get_brands_list_from_request(self.request)
+    #     if brands:
+    #         for brand in brands:
+    #             brand_q |= Q(brand__name=brand)
+    #     sizes = get_sizes_list_from_request(self.request)
+    #     if sizes:
+    #         for size in sizes:
+    #             size_q |= Q(product_variation__size__name=size)
+    #     categories = get_categories_list_from_request(self.request)
+    #     if categories:
+    #         for category in categories:
+    #             category_q |= Q(category__name=category)
+    #     colors = get_colors_list_from_request(self.request)
+    #     if colors:
+    #         for color in colors:
+    #             color_q |= Q(color__name=color)
+    #     return brand_q & size_q & category_q & color_q
 
     def get_filters(self):
         brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
@@ -43,19 +64,19 @@ class ShopView(generic.ListView):
         brands = get_brands_list_from_request(self.request)
         if brands:
             for brand in brands:
-                brand_q |= Q(brand__name=brand)
+                brand_q |= Q(product__brand__name=brand)
         sizes = get_sizes_list_from_request(self.request)
         if sizes:
             for size in sizes:
-                size_q |= Q(product_variation__size__name=size)
+                size_q |= Q(product__product_variation__size__name=size)
         categories = get_categories_list_from_request(self.request)
         if categories:
             for category in categories:
-                category_q |= Q(category__name=category)
+                category_q |= Q(product__category__name=category)
         colors = get_colors_list_from_request(self.request)
         if colors:
             for color in colors:
-                color_q |= Q(color__name=color)
+                color_q |= Q(product__color__name=color)
         return brand_q & size_q & category_q & color_q
 
     def get_ordering(self):
@@ -79,7 +100,7 @@ class ShopView(generic.ListView):
         context['sizes_list'] = get_all_sizes()
         context['categories_list'] = get_all_categories()
         context['colors_list'] = get_all_colors()
-        context['selected_ordering'] = get_ordering_from_request(self.request)
+        context['selected_ordering'] = self.request.GET.get('ordering', '')
         context['selected_brand'] = get_brands_list_from_request(self.request)
         context['selected_size'] = [int(size) for size in get_sizes_list_from_request(self.request)]
         context['selected_category'] = get_categories_list_from_request(self.request)

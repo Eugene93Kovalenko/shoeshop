@@ -155,7 +155,7 @@
                         <div class="desc">
                             <h2><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h2>
                                 {% if product.discount %}
-                                <h6>${{ product.get_discount_price }}
+                                <h6>${{ product.actual_price }}
                                     <del class="text-muted ml-2">${{ product.price }}</del>
                                 </h6>
                                 {% else %}
