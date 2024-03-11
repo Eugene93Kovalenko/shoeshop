@@ -3,7 +3,7 @@ import logging
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
@@ -39,14 +39,14 @@ class CartView(generic.ListView):
 
 
 class AddToCart(generic.View):
-    def post(self, request, slug):
+    def post(self, request, pk):
         if request.POST.get('quantity') == '0' or not request.POST.get('product-size'):
             messages.warning(request, "You have to choose product size and quantity")
             return redirect(request.META.get('HTTP_REFERER'))
         cart = Cart(self.request)
         quantity = int(request.POST.get('quantity'))
         size = request.POST.get('product-size')
-        product_variation = get_product_variation(slug, size)
+        product_variation = get_product_variation(pk, size)
         if product_variation.quantity < quantity:
             messages.warning(request, "This product is not in stock in this quantity")
             return redirect(request.META.get('HTTP_REFERER'))
@@ -55,18 +55,20 @@ class AddToCart(generic.View):
 
 
 class RemoveFromCart(generic.View):
-    def post(self, request, slug):
+    def post(self, request, pk):
         cart = Cart(self.request)
         size = request.POST.get('size')
-        product_variation = get_product_variation(slug, size)
+        product_variation = get_product_variation(pk, size)
         cart.delete(product_variation)
-        # logger.info(f'{product_variation} deleted from cart')
         return redirect("orders:cart")
 
 
 class CheckoutFormView(generic.FormView):
     template_name = "orders/checkout.html"
     form_class = CheckoutForm
+
+    def get_success_url(self):
+        return reverse('orders:create-checkout-session')
 
     @transaction.atomic
     def form_valid(self, form):
@@ -89,7 +91,7 @@ class CheckoutFormView(generic.FormView):
 class CreateStripeCheckoutSessionView(generic.View):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    def post(self, request):
+    def get(self, request):
         checkout_session = stripe.checkout.Session.create(
             client_reference_id=request.user.id,
             payment_method_types=['card'],

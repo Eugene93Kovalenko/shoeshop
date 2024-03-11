@@ -1,0 +1,288 @@
+{% extends 'products/shop.html' %}
+{% load custom_tags %}
+{% block content %}
+<div id="page">
+    <div class="container">
+
+        <div class="breadcrumb">
+        {% block breadcrumb %}
+            {{ block.super }}
+
+            {% if product_is_for_men %}
+
+            {% url 'products:shop-men' as shop_men_url %}
+            {% breadcrumb_item shop_men_url 'MEN' %}
+
+            {% elif product_is_for_women %}
+
+            {% url 'products:shop-women' as shop_women_url %}
+            {% breadcrumb_item shop_women_url 'WOMEN' %}
+
+            {% endif %}
+
+            {% url 'product-detail product.uuid' as product_url %}
+            {% breadcrumb_item product_url product.name %}
+        {% endblock %}
+        </div>
+
+        <div class="row row-pb-lg product-detail-wrap">
+            <div class="col-sm-8">
+                <div class="owl-carousel">
+                    {% for image in product_images %}
+                    <div class="item">
+                        <div class="product-entry border">
+                            <a href="#" class="prod-img">
+                                <img src="{{ image.get_absolute_url }}" class="img-fluid" alt="img">
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="col-sm-4">
+                <div class="product-desc">
+                    <h3>{{ product.name }}</h3>
+                    <p class="price">
+                        {% if product.discount %}
+                    <h6>${{ product.actual_price }}
+                        <del class="text-muted ml-2">${{ product.price }}</del>
+                    </h6>
+                    {% else %}
+                    <h6>${{ product.price }}</h6>
+                    {% endif %}
+                    <span class="rate">
+                            <i class="icon-star{% if average_rating == 0.5 %}-half{% elif average_rating > 0 %}-full{% endif %}"></i>
+                            <i class="icon-star{% if average_rating == 1.5 %}-half{% elif average_rating > 1 %}-full{% endif %}"></i>
+                            <i class="icon-star{% if average_rating == 2.5 %}-half{% elif average_rating > 2 %}-full{% endif %}"></i>
+                            <i class="icon-star{% if average_rating == 3.5 %}-half{% elif average_rating > 3 %}-full{% endif %}"></i>
+                            <i class="icon-star{% if average_rating == 4.5 %}-half{% elif average_rating > 4 %}-full{% endif %}"></i>
+                            ({{ reviews_quantity }} review(s))
+                        </span>
+                    <p>{{ product.description}}</p>
+                    <form action="{{ product.get_add_to_cart_url }}" method="post">
+                        {% csrf_token %}
+                        <div class="size-wrap">
+                            <div class="block-26 mb-2">
+                                <h4>Size</h4>
+                                {% for size in list_of_product_sizes %}
+                                <label class="checkbox-btn">
+                                    <input type="radio" class="btn-check" name="product-size"
+                                           value="{{ size.name }}">
+                                    <span>{{ size.name }}</span>
+                                </label>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        <div class="input-group mb-4">
+                                <span class="input-group-btn">
+                                    <button type="button" class="quantity-left-minus btn" data-type="minus"
+                                            data-field="">
+                                        <i class="icon-minus2"></i>
+                                    </button>
+                                </span>
+                            <input type="text" id="quantity" name="quantity"
+                                   class="form-control input-number"
+                                   value="1" min="1" max="100">
+                            <button type="button" class="quantity-right-plus btn" data-type="plus" data-field="">
+                                <i class="icon-plus2"></i>
+                            </button>
+                        </div>
+                        <p>
+                            {% for message in messages%}
+                            {{ message }}
+                            {% endfor %}
+                        </p>
+                        <div class="row">
+                            <div class="row col-sm-12 text-center">
+                                <p class="addtocart">
+                                    <button class="btn btn-primary btn-addtocart update-cart">
+                                        <i class="icon-shopping-cart"></i>Add to Cart
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <div class="row">
+                    <div class="col-md-12 pills">
+                        <div class="bd-example bd-example-tabs">
+                            <ul class="nav nav-pills mb-3" id="pills-tab" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" id="pills-description-tab" data-toggle="pill"
+                                       href="#pills-description" role="tab" aria-controls="pills-description"
+                                       aria-expanded="true">Description</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="pills-review-tab" data-toggle="pill"
+                                       href="#pills-review" role="tab" aria-controls="pills-review"
+                                       aria-expanded="true">Reviews ({{ reviews_quantity }})</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" id="pills-leave-review-tab" data-toggle="pill"
+                                       href="#pills-leave-review" role="tab" aria-controls="pills-leave-review"
+                                       aria-expanded="true">Leave a review</a>
+                                </li>
+                            </ul>
+                            <div class="tab-content" id="pills-tabContent">
+                                <div class="tab-pane border fade show active" id="pills-description" role="tabpanel"
+                                     aria-labelledby="pills-description-tab">
+                                    {{ product.description }}
+                                </div>
+                                <div class="tab-pane border fade" id="pills-review" role="tabpanel"
+                                     aria-labelledby="pills-review-tab">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h3 class="head">{{ reviews_quantity }} REVIEW(S)</h3>
+                                            {% for review in product_reviews %}
+                                            <div class="review">
+                                                <!--<div class="user-img"-->
+                                                <!--     style="background-image: url(images/person1.jpg)">-->
+                                                <!--</div>-->
+                                                <div class="desc">
+                                                    <h4>
+                                                            <span class="text-left">
+                                                                {{ review.first_name }} {{ review.last_name }}
+                                                            </span>
+                                                        <span class="text-right">{{ review.created_at }}</span>
+                                                    </h4>
+                                                    <p class="star">
+										   				<span>
+										   					<i class="icon-star{% if review.rate >= 1 %}-full{% endif %}"></i>
+										   					<i class="icon-star{% if review.rate >= 2 %}-full{% endif %}"></i>
+										   					<i class="icon-star{% if review.rate >= 3 %}-full{% endif %}"></i>
+										   					<i class="icon-star{% if review.rate >= 4 %}-full{% endif %}"></i>
+										   					<i class="icon-star{% if review.rate == 5 %}-full{% endif %}"></i>
+									   					</span>
+                                                    </p>
+                                                    <p>{{ review.text }}</p>
+                                                </div>
+                                            </div>
+                                            {% endfor %}
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="rating-wrap">
+                                                <h3 class="head">Review details</h3>
+                                                <div class="wrap">
+                                                    <p class="star">
+										   				<span>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+                                                            ({% firstof percentage_of_5_star_reviews '0' %}%)
+									   					</span>
+                                                        <span>{% firstof count_of_5_star_reviews '0' %} review(s)
+                                                            </span>
+                                                    </p>
+                                                    <p class="star">
+										   				<span>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-empty"></i>
+                                                            ({% firstof percentage_of_4_star_reviews '0' %}%)
+									   					</span>
+                                                        <span>{% firstof count_of_4_star_reviews '0' %} review(s)
+                                                            </span>
+                                                    </p>
+                                                    <p class="star">
+										   				<span>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-empty"></i>
+										   					<i class="icon-star-empty"></i>
+                                                            ({% firstof percentage_of_3_star_reviews '0' %}%)
+									   					</span>
+                                                        <span>{% firstof count_of_3_star_reviews '0' %} review(s)
+                                                            </span>
+                                                    </p>
+                                                    <p class="star">
+										   				<span>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-empty"></i>
+										   					<i class="icon-star-empty"></i>
+										   					<i class="icon-star-empty"></i>
+                                                            ({% firstof percentage_of_2_star_reviews '0' %}%)
+									   					</span>
+                                                        <span>{% firstof count_of_2_star_reviews '0' %} review(s)
+                                                            </span>
+                                                    </p>
+                                                    <p class="star">
+										   				<span>
+										   					<i class="icon-star-full"></i>
+										   					<i class="icon-star-empty"></i>
+										   					<i class="icon-star-empty"></i>
+										   					<i class="icon-star-empty"></i>
+										   					<i class="icon-star-empty"></i>
+                                                            ({% firstof percentage_of_1_star_reviews '0' %}%)
+									   					</span>
+                                                        <span>{% firstof count_of_1_star_reviews '0' %} review(s)
+                                                            </span>
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane border fade" id="pills-leave-review" role="tabpanel"
+                                     aria-labelledby="pills-leave-review-tab">
+                                    <div class="col-md-6">
+                                        {% if not user.is_authenticated %}
+                                        <h5 class="mb-4">
+                                            <a href="{% url 'accounts:login' %}"><u>Sign in</u></a>to leave a
+                                            review.
+                                        </h5>
+                                        {% endif %}
+                                        <p>Required fields are marked *</p>
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <div class="d-flex my-3">
+                                                <p class="mb-0 mr-2">Choose Your Rating * :</p>
+                                                <div class="rating-area">
+                                                    {% for rate in form.rate %}
+                                                    <input type="radio" id="{{ forloop.revcounter }}"
+                                                           name="rate" value="{{ forloop.revcounter }}" checked>
+                                                    <label for="{{ forloop.revcounter }}" title=""></label>
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Your First Name * :</label>
+                                                {{ form.first_name }}
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Your Last Name * :</label>
+                                                {{ form.last_name }}
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Your Review:</label>
+                                                {{ form.text }}
+                                            </div>
+                                            <div class="form-group mb-0">
+                                                <input type="submit" value="Leave Your Review"
+                                                       class="btn btn-primary px-3">
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+

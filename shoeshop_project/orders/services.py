@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 from django.db import transaction
+from django_tools.middlewares import ThreadLocal
 
 from orders.cart import Cart
 from . import tasks
@@ -10,7 +13,7 @@ def get_metadata(request):
     cart = Cart(request)
     metadata = {}
     for item in cart:
-        metadata[item['product_variation'].id] = item['quantity']
+        metadata[item['product_variation_id']] = item['quantity']
     return metadata
 
 
@@ -22,9 +25,9 @@ def get_line_items_list(request):
             {
                 'price_data': {
                     'currency': 'usd',
-                    'unit_amount': int(item['price']) * 100,
+                    'unit_amount': int(Decimal(item['price'])) * 100,
                     'product_data': {
-                        'name': item['product_variation'].product.name,
+                        'name': item['product_name'],
                     },
                 },
                 'quantity': item['quantity']

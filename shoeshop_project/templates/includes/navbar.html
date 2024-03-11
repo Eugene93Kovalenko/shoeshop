@@ -1,0 +1,63 @@
+<nav class="colorlib-nav" role="navigation">
+    <div class="top-menu">
+        <div class="container">
+            <div class="row">
+                <div class="col-sm-7 col-md-9">
+                    <div id="colorlib-logo"><a href="{% url 'products:home' %}">Footwear</a></div>
+                </div>
+                <div class="col-sm-5 col-md-3">
+                    <form action="{% url 'products:search' %}" method="get" class="search-wrap">
+                        <div class="form-group">
+                            <input type="search" name="q" class="form-control search" placeholder="Search"
+                                   {% if q %} value="{{ q }}" {% endif %}>
+                            <button class="btn btn-primary submit-search text-center" type="submit">
+                                <i class="icon-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 text-left menu-1">
+                    <ul>
+                        <li><a href="{% url 'products:home' %}">Home</a></li>
+                        <li class="has-dropdown">
+                            <a href="">Pages</a>
+                            <ul class="dropdown">
+                                <li><a href="{% url 'orders:cart' %}">Shopping Cart</a></li>
+                                <li><a href="{% url 'orders:checkout' %}">Checkout</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{% url 'products:shop' %}">Shop</a></li>
+                        <li><a href="{% url 'products:shop-men' %}">Men</a></li>
+                        <li><a href="{% url 'products:shop-women' %}">Women</a></li>
+                        <li><a href="{% url 'products:about' %}">About</a></li>
+                        <li><a href="{% url 'products:contact' %}">Contact</a></li>
+                        <li class="cart"><a href="{% url 'orders:cart' %}"><i class="icon-shopping-cart"></i> Cart
+                            [{{ cart|length }}]</a></li>
+                        {% if user.is_authenticated %}
+                        <li class="cart"><a href="{% url 'accounts:logout' %}">Sign Out</a></li>
+                        {% else %}
+                        <li class="cart"><a href="{% url 'accounts:login' %}">Login</a></li>
+                        <li class="cart"><a href="{% url 'accounts:register' %}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<style>
+<!--    // Получаем текущий путь страницы-->
+<!--    var currentPath = window.location.pathname;-->
+
+<!--    // Находим все ссылки в меню-->
+<!--    var menuLinks = document.querySelectorAll('.menu-1 a');-->
+
+<!--    // Перебираем каждую ссылку и добавляем класс "active" к той, которая соответствует текущему пути-->
+<!--    menuLinks.forEach(function(link) {-->
+<!--        if (link.getAttribute('href') === currentPath) {-->
+<!--            link.classList.add('active');-->
+<!--        }-->
+<!--    });-->
+</style>

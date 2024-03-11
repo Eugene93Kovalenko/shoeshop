@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% block content %}
+
+<div id="page">
+    <div class="container">
+        <div class="breadcrumb">
+        {% block breadcrumb %}
+            {{ block.super }}
+
+            {% url 'products:shop' as shop_url %}
+            {% breadcrumb_item shop_url 'SHOP' %}
+
+            {% if page_if_for_women_shoes %}
+
+            {% url 'products:shop-women' as shop_women_url %}
+            {% breadcrumb_item shop_women_url 'WOMEN' %}
+
+            {% elif page_if_for_men_shoes %}
+
+            {% url 'products:shop-men' as shop_men_url %}
+            {% breadcrumb_item shop_men_url 'MEN' %}
+
+            {% endif %}
+        {% endblock %}
+        </div>
+
+        <div class="row">
+            {% include 'includes/sidebar_filters.html' %}
+            <div class="col-lg-9 col-xl-9">
+                <div class="row row-pb-md">
+                    <!--                    {% if products %}-->
+                    <!--                    {% for product in products %}-->
+                    <!--                    <div class="col-lg-4 mb-4 text-center">-->
+                    <!--                        <div class="product-entry border">-->
+                    <!--                            <a href="{{ product.get_absolute_url }}" class="prod-img">-->
+                    <!--                                <img src="{{ product.images.first.get_absolute_url }}" class="img-fluid" alt="img">-->
+                    <!--                            </a>-->
+                    <!--                            <div class="desc">-->
+                    <!--                                <h2><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h2>-->
+                    <!--                                {% if product.discount %}-->
+                    <!--                                <h6>${{ product.get_discount_price }}-->
+                    <!--                                    <del class="text-muted ml-2">${{ product.price }}</del>-->
+                    <!--                                </h6>-->
+                    <!--                                {% else %}-->
+                    <!--                                <h6>${{ product.price }}</h6>-->
+                    <!--                                {% endif %}-->
+                    <!--                            </div>-->
+                    <!--                        </div>-->
+                    <!--                    </div>-->
+                    <!--                    {% endfor %}-->
+                    <!--                    {% else %}-->
+                    <!--                    <h1>No products found</h1>-->
+                    <!--                    {% endif %}-->
+                    {% if images %}
+                    {% for image in images %}
+                    <div class="col-lg-4 mb-4 text-center">
+                        <div class="product-entry border">
+                            <a href="{{ image.product.get_absolute_url }}" class="prod-img">
+                                <img src="{{ image.get_absolute_url }}" class="img-fluid" alt="img">
+                            </a>
+                            <div class="desc">
+                                <h2><a href="{{ image.product.get_absolute_url }}">{{ image.product.name }}</a></h2>
+                                {% if image.product.discount %}
+                                <h6>${{ image.product.actual_price }}
+                                    <del class="text-muted ml-2">${{ image.product.price }}</del>
+                                </h6>
+                                {% else %}
+                                <h6>${{ image.product.price }}</h6>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    {% else %}
+                    <h1>No products found</h1>
+                    {% endif %}
+                </div>
+                {% include 'includes/pagination.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+{% include 'includes/partners.html' %}
+{% endblock content %}

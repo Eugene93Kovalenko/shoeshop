@@ -11,12 +11,10 @@ from .forms import ContactForm, ReviewForm
 from .models import *
 from . import tasks
 from .queries import get_filtered_products, get_all_categories, get_all_sizes, get_all_brands, \
-    get_all_colors, get_ordering_option, get_product_from_slug, get_single_product_images, \
+    get_all_colors, get_ordering_option, get_single_product, get_single_product_images, \
     get_single_product_variations, get_single_product_reviews, get_single_product_reviews_quantity, \
     create_product_review, get_ratings_count, get_queryset_after_search, get_all_images
-from .services import get_average_rating, update_recently_viewed_session, get_ordering_from_request, \
-    get_brands_list_from_request, get_sizes_list_from_request, get_categories_list_from_request, \
-    get_colors_list_from_request
+from .services import get_average_rating, update_recently_viewed_session, get_ordering_from_request
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +33,7 @@ class ShopView(generic.ListView):
     template_name = "products/shop.html"
     # context_object_name = "products"
     context_object_name = "images"
-    paginate_by = 4
+    paginate_by = 2
 
     # def get_filters(self):
     #     brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
@@ -61,19 +59,19 @@ class ShopView(generic.ListView):
     def get_filters(self):
         brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
 
-        brands = get_brands_list_from_request(self.request)
+        brands = self.request.GET.getlist('brands')
         if brands:
             for brand in brands:
                 brand_q |= Q(product__brand__name=brand)
-        sizes = get_sizes_list_from_request(self.request)
+        sizes = self.request.GET.getlist('sizes')
         if sizes:
             for size in sizes:
                 size_q |= Q(product__product_variation__size__name=size)
-        categories = get_categories_list_from_request(self.request)
+        categories = self.request.GET.getlist('categories')
         if categories:
             for category in categories:
                 category_q |= Q(product__category__name=category)
-        colors = get_colors_list_from_request(self.request)
+        colors = self.request.GET.getlist('colors')
         if colors:
             for color in colors:
                 color_q |= Q(product__color__name=color)
@@ -84,8 +82,8 @@ class ShopView(generic.ListView):
 
     def get_gender_filter(self):
         gender_variations = {
-            '/shop/women/': {'gender__name': 'Women'},
-            '/shop/men/': {'gender__name': 'Men'},
+            '/shop/women/': {'product__gender__name': 'Women'},
+            '/shop/men/': {'product__gender__name': 'Men'},
         }
         gender_filter = gender_variations.get(self.request.path, {})
         return gender_filter
@@ -101,10 +99,12 @@ class ShopView(generic.ListView):
         context['categories_list'] = get_all_categories()
         context['colors_list'] = get_all_colors()
         context['selected_ordering'] = self.request.GET.get('ordering', '')
-        context['selected_brand'] = get_brands_list_from_request(self.request)
-        context['selected_size'] = [int(size) for size in get_sizes_list_from_request(self.request)]
-        context['selected_category'] = get_categories_list_from_request(self.request)
-        context['selected_color'] = get_colors_list_from_request(self.request)
+        context['selected_brands'] = self.request.GET.getlist('brands')
+        context['selected_sizes'] = [int(size) for size in self.request.GET.getlist('sizes')]
+        context['selected_categories'] = self.request.GET.getlist('categories')
+        context['selected_colors'] = self.request.GET.getlist('colors')
+        context['page_if_for_men_shoes'] = True if 'men' in self.request.path else False
+        context['page_if_for_women_shoes'] = True if 'women' in self.request.path else False
         return context
 
 
@@ -136,26 +136,27 @@ class ProductDetailView(generic.DetailView):
     model = Product
     template_name = "products/product-detail.html"
     context_object_name = "product"
-    slug_url_kwarg = "product_slug"
+    pk_url_kwarg = 'pk'
 
     def get(self, request, *args, **kwargs):
-        update_recently_viewed_session(self.request.session, self.kwargs['product_slug'])
-        current_product = get_product_from_slug(self.kwargs["product_slug"])
+        update_recently_viewed_session(session=self.request.session, uuid=self.kwargs['pk'])
+        current_product = get_single_product(product_id=self.kwargs['pk'])
         current_product.last_visit = timezone.now()
         current_product.save()
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
-        slug = self.kwargs["product_slug"]
+        product_id = self.kwargs['pk']
         context["form"] = ReviewForm()
-        context["product_images"] = get_single_product_images(slug)
-        context['list_of_product_sizes'] = [product.size for product in get_single_product_variations(slug)]
-        context['product_reviews'] = get_single_product_reviews(slug)
-        logger.debug(context['product_reviews'])
-        context['reviews_quantity'] = get_single_product_reviews_quantity(slug)
-        context['average_rating'] = get_average_rating(slug)
-        ratings_count = get_ratings_count(slug)
+        context["product_images"] = get_single_product_images(product_id)
+        context['list_of_product_sizes'] = [product.size for product in get_single_product_variations(product_id)]
+        context['product_reviews'] = get_single_product_reviews(product_id)
+        context['reviews_quantity'] = get_single_product_reviews_quantity(product_id)
+        context['average_rating'] = get_average_rating(product_id)
+        ratings_count = get_ratings_count(product_id)
+        context['product_is_for_men'] = str(self.get_object().gender) == 'Men'
+        context['product_is_for_women'] = str(self.get_object().gender) == 'Women'
         for rating_count in ratings_count:
             context[f'count_of_{rating_count["rate"]}_star_reviews'] = rating_count['count']
             context[f'percentage_of_{rating_count["rate"]}_star_reviews'] = rating_count['percent']
@@ -177,7 +178,7 @@ class ProductFormView(generic.FormView):
             return self.form_invalid(form)
 
     def form_valid(self, form):
-        product = get_product_from_slug(self.kwargs["product_slug"])
+        product = get_single_product(self.kwargs['pk'])
         form_data = form.cleaned_data
         create_product_review(
             product,

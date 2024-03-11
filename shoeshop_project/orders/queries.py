@@ -5,14 +5,14 @@ from django.utils import timezone
 
 from accounts.models import CustomUser
 from orders.models import Payment, OrderItem, Order, ShippingAddress
-from products.models import Product, ProductVariation
-
+from products.models import Product, ProductVariation, ProductImage
 
 logger = logging.getLogger('main')
 
 
 def get_recently_viewed_products(session):
-    return Product.objects.filter(slug__in=session).order_by('-last_visit')[:4]
+    # return Product.objects.filter(id__in=session).order_by('-last_visit')[:4]
+    return ProductImage.objects.select_related('product').filter(is_main=True, product__id__in=session)
 
 
 def get_custom_user(user_id):
@@ -31,13 +31,24 @@ def update_product_purchases_count_and_quantity_in_stock(order):
         item.product_variation.product.save()
 
 
-def create_order_item(user, product_variation, quantity):
-    return OrderItem.objects.create(user=user, product_variation=product_variation, quantity=quantity)
+def create_order_item(user, product_variation_id, quantity):
+    product_variation = ProductVariation.objects.get(id=product_variation_id)
+    order_item = OrderItem.objects.create(
+        user=user,
+        product_variation=product_variation,
+        quantity=quantity
+    )
+    return order_item
 
 
 def create_order(user):
     order_datetime = timezone.now()
-    return Order.objects.create(user=user, ordered_datetime=order_datetime, ordered=False)
+    order = Order.objects.create(
+        user=user,
+        ordered_datetime=order_datetime,
+        ordered=False
+    )
+    return order
 
 
 def create_payment(session_id, user, order, amount):
@@ -49,8 +60,8 @@ def create_payment(session_id, user, order, amount):
     )
 
 
-def get_product_variation(slug, size):
-    return get_object_or_404(ProductVariation, product__slug=slug, size__name=size)
+def get_product_variation(product_id, size):
+    return get_object_or_404(ProductVariation, product__id=product_id, size__name=size)
 
 
 def get_order_items(user):
@@ -74,9 +85,9 @@ def get_order(user):
 def get_shipping_address(user):
     try:
         return ShippingAddress.objects.get(user=user)
-    except Order.DoesNotExist:
+    except ShippingAddress.DoesNotExist:
         return None
-    except Order.MultipleObjectsReturned:
+    except ShippingAddress.MultipleObjectsReturned:
         logger.error('Multiple objects returned. There should be only 1 shipping address per user')
         return None
 
@@ -111,7 +122,7 @@ def delete_existing_order(user):
 
 def add_order_items_to_order(cart, order, user):
     for item in cart:
-        order_item = create_order_item(user, item['product_variation'], item['quantity'])
+        order_item = create_order_item(user, item['product_variation_id'], item['quantity'])
         order.products.add(order_item)
 
 
@@ -132,4 +143,3 @@ def update_user_info(user, form):
     user.last_name = form.cleaned_data['last_name']
     user.phone = form.cleaned_data['phone']
     user.save()
-

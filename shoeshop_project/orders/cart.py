@@ -7,39 +7,55 @@ from products.models import ProductVariation
 class Cart:
     def __init__(self, request):
         self.session = request.session
-        cart = self.session.setdefault(settings.CART_SESSION_ID, {})
-        self.cart = cart
+        self.cart = self.session.setdefault(settings.CART_SESSION_ID, {})
 
     def __len__(self):
         return sum(item['quantity'] for item in self.cart.values())
 
     def __iter__(self):
-        product_variation_ids = self.cart.keys()
-        product_variations = ProductVariation.objects.filter(id__in=product_variation_ids)
+        # product_variation_ids = self.cart.keys()
+        # product_variations = ProductVariation.objects.filter(id__in=product_variation_ids)
+
+        # for product_variation in product_variations:
+        #     cart[str(product_variation.id)]['product_variation'] = product_variation
+        #     cart[str(product_variation.id)]['product'] = product_variation.product
         cart = self.cart
 
-        for product_variation in product_variations:
-            cart[str(product_variation.id)]['product_variation'] = product_variation
-
         for item in cart.values():
-            item['price'] = Decimal(item['price'])
-            item['total'] = item['price'] * item['quantity']
+            # item['price'] = Decimal(item['price'])
+            # item['total'] = item['price'] * item['quantity']
             yield item
 
     def add(self, product_variation, quantity, user=None):
         product_variation_id = str(product_variation.id)
         if product_variation_id not in self.cart:
-            self.cart[product_variation_id] = {'quantity': quantity,
-                                               'price': str(product_variation.product.get_actual_price),
-                                               'user_id': user}
+            self.cart[product_variation_id] = {
+                'quantity': quantity,
+                'price': str(product_variation.product.actual_price),
+                'user_id': user,
+                'total': str(quantity * product_variation.product.actual_price),
+                'product_name': product_variation.product.name,
+                'product_id': str(product_variation.product.id),
+                'product_url': product_variation.product.get_absolute_url(),
+                'product_variation_id': product_variation.id,
+                'size': product_variation.size.name,
+                'image_url': product_variation.product.images.first().get_absolute_url(),
+            }
         else:
             self.cart[product_variation_id]['quantity'] += quantity
         self.save()
 
+    def update_price(self, instance):
+        for item in self.cart.values():
+            if item['product_name'] == instance.name:
+                item['price'] = str(instance.price)
+                item['total'] = item['price'] * item['quantity']
+        self.save()
+
     def delete(self, product_variation):
-        product_id = str(product_variation.id)
-        if product_id in self.cart:
-            del self.cart[product_id]
+        product_variation_id = str(product_variation.id)
+        if product_variation_id in self.cart:
+            del self.cart[product_variation_id]
             self.save()
 
     def clear(self):
@@ -59,6 +75,3 @@ class Cart:
 
     def get_final_order_price(self):
         return self.get_total_all_products_price() + self.get_delivery_price()
-
-
-
