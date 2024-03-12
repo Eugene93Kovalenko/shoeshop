@@ -1,7 +1,5 @@
 from django import template
 
-from products.models import Product
-from products.queries import get_single_product
 
 register = template.Library()
 
@@ -20,16 +18,16 @@ def relative_url(argument, value, urlencode=None):
     return url
 
 
-@register.simple_tag
-def call_get_absolute_url(product_id):
-    product = get_single_product(product_id)
-    return product.get_absolute_url()
-
-
-@register.simple_tag
-def call_get_remove_from_cart_url(product_id):
-    product = get_single_product(product_id)
-    return product.get_remove_from_cart_url()
+# @register.simple_tag
+# def call_get_absolute_url(product_id):
+#     product = get_single_product(product_id)
+#     return product.get_absolute_url()
+#
+#
+# @register.simple_tag
+# def call_get_remove_from_cart_url(product_id):
+#     product = get_single_product(product_id)
+#     return product.get_remove_from_cart_url()
 
 
 @register.simple_tag

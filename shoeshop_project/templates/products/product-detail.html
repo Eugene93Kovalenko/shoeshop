@@ -8,15 +8,15 @@
         {% block breadcrumb %}
             {{ block.super }}
 
-            {% if product_is_for_men %}
+            {% if product_gender == 'Men' %}
 
             {% url 'products:shop-men' as shop_men_url %}
-            {% breadcrumb_item shop_men_url 'MEN' %}
+            {% breadcrumb_item shop_men_url product_gender %}
 
-            {% elif product_is_for_women %}
+            {% elif product_gender == 'Women' %}
 
             {% url 'products:shop-women' as shop_women_url %}
-            {% breadcrumb_item shop_women_url 'WOMEN' %}
+            {% breadcrumb_item shop_women_url product_gender %}
 
             {% endif %}
 
@@ -64,11 +64,11 @@
                         <div class="size-wrap">
                             <div class="block-26 mb-2">
                                 <h4>Size</h4>
-                                {% for size in list_of_product_sizes %}
+                                {% for size in product_sizes %}
                                 <label class="checkbox-btn">
                                     <input type="radio" class="btn-check" name="product-size"
-                                           value="{{ size.name }}">
-                                    <span>{{ size.name }}</span>
+                                           value="{{ size }}">
+                                    <span>{{ size }}</span>
                                 </label>
                                 {% endfor %}
                             </div>

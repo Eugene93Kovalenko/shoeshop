@@ -1,4 +1,5 @@
 import logging
+import time
 
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.utils import timezone
@@ -12,8 +13,8 @@ from .models import *
 from . import tasks
 from .queries import get_filtered_products, get_all_categories, get_all_sizes, get_all_brands, \
     get_all_colors, get_ordering_option, get_single_product, get_single_product_images, \
-    get_single_product_variations, get_single_product_reviews, get_single_product_reviews_quantity, \
-    create_product_review, get_ratings_count, get_queryset_after_search, get_all_images
+    get_single_product_reviews, get_single_product_reviews_quantity, \
+    create_product_review, get_ratings_count, get_queryset_after_search, get_all_images, get_single_product_sizes
 from .services import get_average_rating, update_recently_viewed_session, get_ordering_from_request
 
 logger = logging.getLogger(__name__)
@@ -111,7 +112,7 @@ class ShopView(generic.ListView):
 class SearchView(ShopView):
     def get_queryset(self):
         query = self.request.GET.get("q")
-        search_vector = SearchVector("name", "description")
+        search_vector = SearchVector("product__name", "product__description")
         search_query = SearchQuery(query)
         searched_queryset = get_queryset_after_search(super().get_queryset(), search_vector, search_query)
         return searched_queryset
@@ -138,11 +139,18 @@ class ProductDetailView(generic.DetailView):
     context_object_name = "product"
     pk_url_kwarg = 'pk'
 
+    def get_object(self, queryset=None):
+        if not hasattr(self, 'object'):
+            self.object = super().get_object(queryset=queryset)
+        return self.object
+
     def get(self, request, *args, **kwargs):
-        update_recently_viewed_session(session=self.request.session, uuid=self.kwargs['pk'])
-        current_product = get_single_product(product_id=self.kwargs['pk'])
+        product_id = self.kwargs['pk']
+        update_recently_viewed_session(session=self.request.session, product_id=product_id)
+        # todo
+        current_product = self.get_object()
         current_product.last_visit = timezone.now()
-        current_product.save()
+        current_product.save(update_fields=['last_visit'])
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
@@ -150,16 +158,16 @@ class ProductDetailView(generic.DetailView):
         product_id = self.kwargs['pk']
         context["form"] = ReviewForm()
         context["product_images"] = get_single_product_images(product_id)
-        context['list_of_product_sizes'] = [product.size for product in get_single_product_variations(product_id)]
+        context['product_sizes'] = get_single_product_sizes(product_id)
         context['product_reviews'] = get_single_product_reviews(product_id)
         context['reviews_quantity'] = get_single_product_reviews_quantity(product_id)
         context['average_rating'] = get_average_rating(product_id)
-        ratings_count = get_ratings_count(product_id)
-        context['product_is_for_men'] = str(self.get_object().gender) == 'Men'
-        context['product_is_for_women'] = str(self.get_object().gender) == 'Women'
+        ratings_count = get_ratings_count(product_id=product_id, reviews_quantity=context['reviews_quantity'])
         for rating_count in ratings_count:
             context[f'count_of_{rating_count["rate"]}_star_reviews'] = rating_count['count']
             context[f'percentage_of_{rating_count["rate"]}_star_reviews'] = rating_count['percent']
+        # for breadcrumbs:
+        context['product_gender'] = self.get_object().gender.name
         return context
 
 

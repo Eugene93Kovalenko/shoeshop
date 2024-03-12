@@ -28,6 +28,7 @@ class CartView(generic.ListView):
     context_object_name = 'cart_items'
 
     def get_queryset(self):
+        print(list(Cart(self.request)))
         return Cart(self.request)
 
     def get_context_data(self, *, object_list=None, **kwargs):

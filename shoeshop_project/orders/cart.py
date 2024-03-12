@@ -37,6 +37,7 @@ class Cart:
                 'product_name': product_variation.product.name,
                 'product_id': str(product_variation.product.id),
                 'product_url': product_variation.product.get_absolute_url(),
+                'product_remove_url': product_variation.product.get_remove_from_cart_url(),
                 'product_variation_id': product_variation.id,
                 'size': product_variation.size.name,
                 'image_url': product_variation.product.images.first().get_absolute_url(),

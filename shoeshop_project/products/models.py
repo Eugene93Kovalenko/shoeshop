@@ -2,14 +2,11 @@ import uuid
 
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
-from django.db.models.signals import pre_save
-from django.dispatch import receiver
 from django.urls import reverse
 from config import settings
 
 from django_tools.middlewares import ThreadLocal
 from django.contrib.sessions.models import Session
-# from orders.cart import Cart
 
 
 class Category(models.Model):
@@ -77,7 +74,7 @@ class Size(models.Model):
 class Product(models.Model):
     ORDERING_OPTIONS = [
         ('Popularity', '-popularity'),
-        ('Last', '-last'),
+        ('New', '-last'),
         ('Price high first', '-price'),
         ('Price low first', 'price')
     ]
@@ -116,17 +113,6 @@ class Product(models.Model):
     def get_gender_url(self):
         return reverse("products:gender", kwargs={"gender_slug": self.gender.name})
 
-    # @property
-    # def get_discount_price(self):
-    #     return round(self.price - ((self.price * self.discount) / 100), 2)
-
-    # @property
-    # def get_actual_price(self):
-    #     if self.discount:
-    #         return self.get_discount_price
-    #     else:
-    #         return self.price
-
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "products"
@@ -155,6 +141,7 @@ class ProductImage(models.Model):
     class Meta:
         verbose_name = "Photo"
         verbose_name_plural = "Photos"
+        # ordering = ['product__-last_visit']
 
     def __str__(self):
         return self.image.name

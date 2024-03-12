@@ -47,16 +47,14 @@ def get_single_product_images(product_id):
     return ProductImage.objects.filter(product__id=product_id)
 
 
-def get_single_product_variations(product_id):
-    return ProductVariation.objects.filter(product__id=product_id)
+def get_single_product_sizes(product_id):
+    return ProductVariation.objects.filter(product__id=product_id). \
+        values_list('size__name', flat=True). \
+        distinct()
 
 
-def get_single_product_reviews(product_id):
-    return Review.objects.filter(product__id=product_id)
-
-
-def get_single_product_reviews_quantity(product_id):
-    return Review.objects.filter(product__id=product_id).count()
+# def get_single_product_variations(product_id):
+#     return ProductVariation.objects.filter(product__id=product_id)
 
 
 def get_single_product_rating(product_id):
@@ -75,12 +73,19 @@ def create_product_review(product, rate, text, user, first_name, last_name):
     review.save()
 
 
-def get_ratings_count(product_id):
+def get_single_product_reviews(product_id):
+    return Review.objects.filter(product__id=product_id)
+
+
+def get_single_product_reviews_quantity(product_id):
+    return Review.objects.filter(product__id=product_id).count()
+
+
+def get_ratings_count(product_id, reviews_quantity):
     ratings_count = get_single_product_reviews(product_id) \
         .values('rate') \
         .annotate(count=Count('rate')) \
-        .annotate(percent=ExpressionWrapper((F('count') * 100) / get_single_product_reviews_quantity(product_id),
-                                            output_field=DecimalField()))
+        .annotate(percent=ExpressionWrapper((F('count') * 100) / reviews_quantity, output_field=DecimalField()))
     return ratings_count
 
 

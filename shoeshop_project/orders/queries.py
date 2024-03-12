@@ -11,8 +11,9 @@ logger = logging.getLogger('main')
 
 
 def get_recently_viewed_products(session):
-    # return Product.objects.filter(id__in=session).order_by('-last_visit')[:4]
-    return ProductImage.objects.select_related('product').filter(is_main=True, product__id__in=session)
+    return ProductImage.objects.select_related('product').\
+        filter(is_main=True, product__id__in=session).\
+        order_by('-product__last_visit')
 
 
 def get_custom_user(user_id):
