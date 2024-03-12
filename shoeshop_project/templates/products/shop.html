@@ -54,6 +54,7 @@
                     <!--                    {% endif %}-->
                     {% if images %}
                     {% for image in images %}
+                    <li>{{ image.product.name.headline | safe }} - <b>By <i>{{ image.product.name }}</i></b></li>
                     <div class="col-lg-4 mb-4 text-center">
                         <div class="product-entry border">
                             <a href="{{ image.product.get_absolute_url }}" class="prod-img">

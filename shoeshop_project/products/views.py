@@ -1,7 +1,7 @@
 import logging
 import time
 
-from django.contrib.postgres.search import SearchVector, SearchQuery
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHeadline
 from django.utils import timezone
 
 from django.db.models import Q
@@ -111,8 +111,13 @@ class ShopView(generic.ListView):
 
 class SearchView(ShopView):
     def get_queryset(self):
-        query = self.request.GET.get("q")
-        search_vector = SearchVector("product__name", "product__description")
+        query = self.request.GET.get('q')
+        search_vector = \
+            SearchVector('product__name', weight='A') + \
+            SearchVector('product__description', weight='B') + \
+            SearchVector('product__name', weight='B') + \
+            SearchVector('product__color__name', weight='C') + \
+            SearchVector('product__brand__name', weight='C')
         search_query = SearchQuery(query)
         searched_queryset = get_queryset_after_search(super().get_queryset(), search_vector, search_query)
         return searched_queryset

@@ -93,5 +93,5 @@ def get_queryset_after_search(queryset, search_vector, search_query):
     queryset = queryset.annotate(
         search=search_vector,
         rank=SearchRank(search_vector, search_query)) \
-        .filter(search=search_query)
+        .filter(rank__gte=0.1).order_by('-rank')
     return queryset
