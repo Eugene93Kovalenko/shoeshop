@@ -1,11 +1,11 @@
 import logging
 import time
 
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchHeadline
+from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.utils import timezone
 
 from django.db.models import Q
-from django.shortcuts import get_object_or_404, redirect
+from django.shortcuts import redirect
 from django.views import generic
 
 from .forms import ContactForm, ReviewForm
@@ -32,30 +32,8 @@ class HomeView(generic.ListView):
 class ShopView(generic.ListView):
     model = Product
     template_name = "products/shop.html"
-    # context_object_name = "products"
     context_object_name = "images"
-    paginate_by = 2
-
-    # def get_filters(self):
-    #     brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
-    #
-    #     brands = get_brands_list_from_request(self.request)
-    #     if brands:
-    #         for brand in brands:
-    #             brand_q |= Q(brand__name=brand)
-    #     sizes = get_sizes_list_from_request(self.request)
-    #     if sizes:
-    #         for size in sizes:
-    #             size_q |= Q(product_variation__size__name=size)
-    #     categories = get_categories_list_from_request(self.request)
-    #     if categories:
-    #         for category in categories:
-    #             category_q |= Q(category__name=category)
-    #     colors = get_colors_list_from_request(self.request)
-    #     if colors:
-    #         for color in colors:
-    #             color_q |= Q(color__name=color)
-    #     return brand_q & size_q & category_q & color_q
+    paginate_by = 9
 
     def get_filters(self):
         brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
@@ -152,7 +130,6 @@ class ProductDetailView(generic.DetailView):
     def get(self, request, *args, **kwargs):
         product_id = self.kwargs['pk']
         update_recently_viewed_session(session=self.request.session, product_id=product_id)
-        # todo
         current_product = self.get_object()
         current_product.last_visit = timezone.now()
         current_product.save(update_fields=['last_visit'])
@@ -171,7 +148,6 @@ class ProductDetailView(generic.DetailView):
         for rating_count in ratings_count:
             context[f'count_of_{rating_count["rate"]}_star_reviews'] = rating_count['count']
             context[f'percentage_of_{rating_count["rate"]}_star_reviews'] = rating_count['percent']
-        # for breadcrumbs:
         context['product_gender'] = self.get_object().gender.name
         return context
 

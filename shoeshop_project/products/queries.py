@@ -6,33 +6,30 @@ from products.models import Product, Brand, Size, Category, Color, ProductImage,
 
 
 def get_all_images():
-    return ProductImage.objects.select_related('product').filter(is_main=True)
+    return ProductImage.objects.select_related('product').filter(is_main=True).order_by('product__purchases_count')[:8]
 
 
 def get_filtered_products(filters, ordering, gender_filter):
     if ordering:
-        #     return Product.objects.filter(filters, **gender_filter).order_by(ordering).distinct()
-        # return Product.objects.filter(filters, **gender_filter).distinct()
         return ProductImage.objects.select_related('product').filter(filters, **gender_filter, is_main=True).order_by(
             ordering)
     return ProductImage.objects.select_related('product').filter(filters, **gender_filter, is_main=True)
 
 
 def get_all_brands():
-    return Brand.objects.all()
+    return Brand.objects.values('name')
 
 
 def get_all_sizes():
-    return Size.objects.all()
+    return Size.objects.values('name')
 
 
 def get_all_categories():
-    # faster
-    return Category.objects.all().values('name')
+    return Category.objects.values('name')
 
 
 def get_all_colors():
-    return Color.objects.all()
+    return Color.objects.values('name')
 
 
 def get_ordering_option():
@@ -51,10 +48,6 @@ def get_single_product_sizes(product_id):
     return ProductVariation.objects.filter(product__id=product_id). \
         values_list('size__name', flat=True). \
         distinct()
-
-
-# def get_single_product_variations(product_id):
-#     return ProductVariation.objects.filter(product__id=product_id)
 
 
 def get_single_product_rating(product_id):

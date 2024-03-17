@@ -41,7 +41,7 @@
                         <ul>
                             {% for size in sizes_list %}
                             <label class="checkbox-btn">
-                                <input type="checkbox" name="sizes" value="{{ size }}"
+                                <input type="checkbox" name="sizes" value="{{ size.name }}"
                                        {% if size.name in selected_sizes %} checked {% endif %}>
                                 <span>{{ size.name }}</span>
                             </label>
@@ -59,10 +59,10 @@
                     {% for color in colors_list %}
                     <div class="form-check">
                         <input class="form-check-input" {% if color.name in selected_colors %} checked {% endif %}
-                               type="checkbox" value="{{ color }}"
+                               type="checkbox" value="{{ color.name }}"
                                id="color-{{ forloop.counter0 }}" name="colors">
                         <label class="form-check-label" for="color-{{ forloop.counter0 }}">
-                            {{ color }}
+                            {{ color.name }}
                         </label>
                     </div>
                     {% endfor %}

@@ -5,9 +5,6 @@ from django.db import models
 from django.urls import reverse
 from config import settings
 
-from django_tools.middlewares import ThreadLocal
-from django.contrib.sessions.models import Session
-
 
 class Category(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, unique=True)
@@ -16,9 +13,6 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
-
-    def get_absolute_url(self):
-        return reverse("product_app:category", kwargs={"category_name": self.name.lower()})
 
     class Meta:
         verbose_name = "Category"
@@ -91,7 +85,6 @@ class Product(models.Model):
     gender = models.ForeignKey(Gender, on_delete=models.CASCADE)
     brand = models.ForeignKey(Brand, on_delete=models.CASCADE)
     description = models.TextField(blank=False)
-    slug = models.SlugField(unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     purchases_count = models.PositiveIntegerField(default=0)
@@ -110,9 +103,6 @@ class Product(models.Model):
     def get_remove_from_cart_url(self):
         return reverse("orders:remove-from-cart", kwargs={"pk": str(self.pk)})
 
-    def get_gender_url(self):
-        return reverse("products:gender", kwargs={"gender_slug": self.gender.name})
-
     class Meta:
         verbose_name = "Product"
         verbose_name_plural = "products"
@@ -128,6 +118,7 @@ class ProductVariation(models.Model):
         unique_together = ('product', 'size')
         verbose_name = "Product | Size"
         verbose_name_plural = "Product | Size"
+        ordering = ['size__name']
 
     def __str__(self):
         return f"{self.product} / {self.size} size"
@@ -141,7 +132,6 @@ class ProductImage(models.Model):
     class Meta:
         verbose_name = "Photo"
         verbose_name_plural = "Photos"
-        # ordering = ['product__-last_visit']
 
     def __str__(self):
         return self.image.name

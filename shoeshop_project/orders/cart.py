@@ -1,7 +1,6 @@
 from decimal import Decimal
 
 from config import settings
-from products.models import ProductVariation
 
 
 class Cart:
@@ -13,17 +12,7 @@ class Cart:
         return sum(item['quantity'] for item in self.cart.values())
 
     def __iter__(self):
-        # product_variation_ids = self.cart.keys()
-        # product_variations = ProductVariation.objects.filter(id__in=product_variation_ids)
-
-        # for product_variation in product_variations:
-        #     cart[str(product_variation.id)]['product_variation'] = product_variation
-        #     cart[str(product_variation.id)]['product'] = product_variation.product
-        cart = self.cart
-
-        for item in cart.values():
-            # item['price'] = Decimal(item['price'])
-            # item['total'] = item['price'] * item['quantity']
+        for item in self.cart.values():
             yield item
 
     def add(self, product_variation, quantity, user=None):

@@ -14,6 +14,6 @@ def update_actual_price(sender, instance, **kwargs):
         instance.actual_price = instance.price
 
     # todo вынести в отдельный сигнал?
-    request = ThreadLocal.get_current_request()
-    cart = Cart(request)
-    cart.update_price(instance)
+    # request = ThreadLocal.get_current_request()
+    # cart = Cart(request)
+    # cart.update_price(instance)

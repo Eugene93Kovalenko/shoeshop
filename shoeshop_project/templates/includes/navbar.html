@@ -8,7 +8,7 @@
                 <div class="col-sm-5 col-md-3">
                     <form action="{% url 'products:search' %}" method="get" class="search-wrap">
                         <div class="form-group">
-                            <input type="search" name="q" class="form-control search" placeholder="Search"
+                            <input type="search" name="q" class="form-control search" placeholder="Search..."
                                    {% if q %} value="{{ q }}" {% endif %}>
                             <button class="btn btn-primary submit-search text-center" type="submit">
                                 <i class="icon-search"></i></button>
@@ -46,18 +46,3 @@
         </div>
     </div>
 </nav>
-
-<style>
-<!--    // Получаем текущий путь страницы-->
-<!--    var currentPath = window.location.pathname;-->
-
-<!--    // Находим все ссылки в меню-->
-<!--    var menuLinks = document.querySelectorAll('.menu-1 a');-->
-
-<!--    // Перебираем каждую ссылку и добавляем класс "active" к той, которая соответствует текущему пути-->
-<!--    menuLinks.forEach(function(link) {-->
-<!--        if (link.getAttribute('href') === currentPath) {-->
-<!--            link.classList.add('active');-->
-<!--        }-->
-<!--    });-->
-</style>
