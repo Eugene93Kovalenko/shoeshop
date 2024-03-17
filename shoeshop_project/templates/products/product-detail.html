@@ -5,7 +5,7 @@
     <div class="container">
 
         <div class="breadcrumb">
-        {% block breadcrumb %}
+            {% block breadcrumb %}
             {{ block.super }}
 
             {% if product_gender == 'Men' %}
@@ -22,7 +22,7 @@
 
             {% url 'product-detail product.uuid' as product_url %}
             {% breadcrumb_item product_url product.name %}
-        {% endblock %}
+            {% endblock %}
         </div>
 
         <div class="row row-pb-lg product-detail-wrap">
@@ -65,7 +65,8 @@
                             <div class="block-26 mb-2">
                                 <h4>Size</h4>
                                 {% for size in product_sizes %}
-                                <label class="checkbox-btn">
+                                <!--                                <label class="checkbox-btn">-->
+                                <label>
                                     <input type="radio" class="btn-check" name="product-size"
                                            value="{{ size }}">
                                     <span>{{ size }}</span>
@@ -92,14 +93,12 @@
                             {{ message }}
                             {% endfor %}
                         </p>
-                        <div class="row">
-                            <div class="row col-sm-12 text-center">
-                                <p class="addtocart">
-                                    <button class="btn btn-primary btn-addtocart update-cart">
-                                        <i class="icon-shopping-cart"></i>Add to Cart
-                                    </button>
-                                </p>
-                            </div>
+                        <div class="text-center">
+                            <p class="addtocart">
+                                <button class="btn btn-primary btn-addtocart update-cart col">
+                                    Add to Cart
+                                </button>
+                            </p>
                         </div>
                     </form>
                 </div>

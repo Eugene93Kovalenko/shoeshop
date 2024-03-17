@@ -118,14 +118,14 @@
                             <div class="col-sm-12 button-container">
                                 {% if user.is_authenticated %}
                                 {% if cart.get_final_order_price %}
-                                <a href="{% url 'orders:checkout' %}" class="block-26 mb-2 side border mb-1">
+                                <a href="{% url 'orders:checkout' %}" class="btn btn-primary btn-addtocart update-cart col">
                                     Proceed to checkout</a>
                                 {% else %}
-                                <a href="{% url 'orders:cart' %}" class="block-26 mb-2 side border mb-1">
+                                <a href="{% url 'orders:cart' %}" class="btn btn-primary btn-addtocart update-cart col">
                                     Proceed to checkout</a>
                                 {% endif %}
                                 {% else %}
-                                <a href="{% url 'accounts:login' %}" class="block-26 mb-2 side border mb-1">
+                                <a href="{% url 'accounts:login' %}" class="btn btn-primary btn-addtocart update-cart col">
                                     Proceed to checkout</a>
                                 {% endif %}
                             </div>
