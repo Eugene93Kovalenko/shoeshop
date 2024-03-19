@@ -1,0 +1,8 @@
+location /static/ {
+    alias /static/;
+    types { text/css css; }
+}
+
+location /media/ {
+    alias /media/;
+}

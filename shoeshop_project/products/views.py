@@ -1,5 +1,4 @@
 import logging
-import time
 
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.utils import timezone
