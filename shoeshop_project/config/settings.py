@@ -206,7 +206,7 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 EMAIL_ADMIN = EMAIL_HOST_USER
 
-CSRF_TRUSTED_ORIGINS = ['https://easyoffer.ru', 'https://127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.shoe-shop.site', 'http://*.shoe-shop.site', 'https://127.0.0.1']
 
 LOGGING = {
     "version": 1,
