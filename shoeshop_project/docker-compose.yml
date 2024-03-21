@@ -20,8 +20,8 @@ services:
 #    command: python manage.py runserver 0.0.0.0:8000
     env_file: .env
     environment:
-      - VIRTUAL_HOST=${ALLOWED_HOST}
-      - LETSENCRYPT_HOST=${ALLOWED_HOST}
+      - VIRTUAL_HOST=django.shoe-shop.site
+      - LETSENCRYPT_HOST=django.shoe-shop.site
     volumes:
       - ./:/app
       - static_volume:/app/static
@@ -61,6 +61,7 @@ services:
       - nginx
     volumes:
       - acme:/etc/acme.sh
+      - /var/run/docker.sock:/tmp/docker.sock:ro
 
   celery:
     build: .
