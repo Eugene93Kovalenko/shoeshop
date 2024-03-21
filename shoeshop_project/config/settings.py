@@ -27,23 +27,13 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 DEBUG = os.getenv('DEBUG', False)
 
-# INTERNAL_IPS = [
-# '127.0.0.1',
-# 'localhost',
-# '172.19.0.4',
-# '172.19.0.1',
-# '172.19.0.2',
-# '172.19.0.6',
-# '172.17.0.1'
-# '0.0.0.0'
-# ]
-
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
     'app',
     'postgres',
-    'django.shoe-shop.site'
+    'django.shoe-shop.site',
+    'shoe-shop.site',
 ]
 
 if DEBUG:
@@ -195,7 +185,7 @@ CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND')
 # CELERY_CACHE_BACKEND = 'default'
 # CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-# SMTP
+# SMTPls
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
