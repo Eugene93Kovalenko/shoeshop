@@ -60,8 +60,9 @@ services:
     volumes_from:
       - nginx
     volumes:
+      - /var/run/docker.sock:var/run/docker.sock:ro
       - acme:/etc/acme.sh
-      - /var/run/docker.sock:/tmp/docker.sock:ro
+
 
   celery:
     build: .
