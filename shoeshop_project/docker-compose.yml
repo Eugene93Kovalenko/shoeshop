@@ -1,5 +1,5 @@
-version: '3.8'
-#version: '2'
+#version: '3.8'
+version: '2'
 
 services:
   db:
@@ -28,8 +28,6 @@ services:
       - ./:/app
       - static_volume:/app/static
       - media_volume:/app/media
-    expose:
-      - '8000'
     ports:
       - '8000:8000'
     depends_on:
@@ -46,25 +44,25 @@ services:
     volumes:
       - static_volume:/static
       - media_volume:/media
-#      - certs:/etc/nginx/certs
-#      - vhost:/etc/nginx/vhost.d
-#      - html:/usr/share/nginx/html
-#      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - certs:/etc/nginx/certs
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
     ports:
       - '80:80'
       - '443:443'
     depends_on:
       - app
 
-#  acme_companion:
-#    image: nginxproxy/acme-companion:2.2
-#    container_name: acme-companion
-#    env_file: .env
-#    volumes_from:
-#      - nginx
-#    volumes:
-#      - /var/run/docker.sock:/var/run/docker.sock:ro
-#      - acme:/etc/acme.sh
+  acme_companion:
+    image: nginxproxy/acme-companion:2.2
+    container_name: acme-companion
+    env_file: .env
+    volumes_from:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - acme:/etc/acme.sh
 
 
   celery:
