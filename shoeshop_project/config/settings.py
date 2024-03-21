@@ -27,14 +27,17 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 DEBUG = os.getenv('DEBUG', False)
 
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'app',
-    'postgres',
-    'django.shoe-shop.site',
-    'shoe-shop.site',
-]
+# ALLOWED_HOSTS = [
+#     '127.0.0.1',
+#     'localhost',
+#     'app',
+#     'postgres',
+#     'django.shoe-shop.site',
+#     'shoe-shop.site',
+# ]
+
+ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
+
 
 if DEBUG:
     import socket
@@ -44,7 +47,7 @@ if DEBUG:
 
 
 def custom_show_toolbar(request):
-    return True
+    return False
 
 
 DEBUG_TOOLBAR_CONFIG = {
@@ -196,7 +199,8 @@ DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 EMAIL_ADMIN = EMAIL_HOST_USER
 
-CSRF_TRUSTED_ORIGINS = ['https://*.shoe-shop.site', 'http://*.shoe-shop.site', 'https://127.0.0.1']
+CSRF_TRUSTED_ORIGINS = ['https://*.shoe-shop.site', 'http://*.shoe-shop.site', 'https://django.shoe-shop.site',
+                        'http://django.shoe-shop.site', 'https://127.0.0.1']
 
 LOGGING = {
     "version": 1,

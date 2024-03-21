@@ -20,8 +20,8 @@ services:
 #    command: python manage.py runserver 0.0.0.0:8000
     env_file: .env
     environment:
-      - VIRTUAL_HOST=django.shoe-shop.site
-      - LETSENCRYPT_HOST=django.shoe-shop.site
+      - VIRTUAL_HOST=${ALLOWED_HOST}
+      - LETSENCRYPT_HOST=${ALLOWED_HOST}
     volumes:
       - ./:/app
       - static_volume:/app/static
