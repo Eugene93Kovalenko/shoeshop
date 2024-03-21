@@ -26,13 +26,18 @@ services:
       - ./:/app
       - static_volume:/app/static
       - media_volume:/app/media
+    expose:
+      - '8000'
     ports:
       - '8000:8000'
     depends_on:
       - db
 
   nginx:
-    build: ./nginx
+#    build: ./nginx
+    build:
+      dockerfile: ./Dockerfile
+      context: ./nginx/
     container_name: nginx
 #    restart: unless-stopped
     volumes:
@@ -55,7 +60,6 @@ services:
     volumes_from:
       - nginx
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
       - acme:/etc/acme.sh
 
   celery:
