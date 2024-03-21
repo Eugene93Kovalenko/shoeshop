@@ -27,16 +27,17 @@ STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
 DEBUG = os.getenv('DEBUG', False)
 
-# ALLOWED_HOSTS = [
-#     '127.0.0.1',
-#     'localhost',
-#     'app',
-#     'postgres',
-#     'django.shoe-shop.site',
-#     'shoe-shop.site',
-# ]
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'app',
+    'postgres',
+    'django.shoe-shop.site',
+    'shoe-shop.site',
+    '5.35.85.27',
+]
 
-ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
+# ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
 
 
 if DEBUG:
