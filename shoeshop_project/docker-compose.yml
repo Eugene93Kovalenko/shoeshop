@@ -40,6 +40,7 @@ services:
   nginx:
     build: ./nginx
     container_name: nginx
+    env_file: .env
 #    restart: unless-stopped
     volumes:
       - static_volume:/static
@@ -61,11 +62,11 @@ services:
 #    volumes_from:
 #      - nginx
     volumes:
-      - static_volume:/static
-      - media_volume:/media
-      - certs:/etc/nginx/certs
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
+#      - static_volume:/static
+#      - media_volume:/media
+#      - certs:/etc/nginx/certs
+#      - vhost:/etc/nginx/vhost.d
+#      - html:/usr/share/nginx/html
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - acme:/etc/acme.sh
 
