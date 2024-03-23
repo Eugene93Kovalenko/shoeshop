@@ -10,10 +10,11 @@ def get_all_images():
 
 
 def get_filtered_products(filters, ordering, gender_filter):
+    product_images = ProductImage.objects.select_related('product').filter(filters, **gender_filter,
+                                                                           is_main=True).distinct()
     if ordering:
-        return ProductImage.objects.select_related('product').filter(filters, **gender_filter, is_main=True).order_by(
-            ordering).distinct('id')
-    return ProductImage.objects.select_related('product').filter(filters, **gender_filter, is_main=True).distinct('id')
+        return product_images.order_by(ordering)
+    return product_images
 
 
 def get_all_brands():

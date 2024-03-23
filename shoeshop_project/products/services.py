@@ -20,7 +20,6 @@ def update_recently_viewed_session(session, product_id):
         recently_viewed.remove(product_id)
 
     recently_viewed.insert(0, product_id)
-    # todo проверить работает ли срез
     session['recently_viewed'] = recently_viewed[:4]
     session.modified = True
 

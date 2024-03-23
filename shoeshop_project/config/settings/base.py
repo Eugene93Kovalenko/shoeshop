@@ -1,6 +1,3 @@
-"""
-https://docs.djangoproject.com/en/4.2/ref/settings/
-"""
 import os
 
 from dotenv import load_dotenv
@@ -10,7 +7,7 @@ from config.logging import CustomJsonFormatter
 
 load_dotenv()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
@@ -25,36 +22,6 @@ STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
 STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
 
-DEBUG = os.getenv('DEBUG', False)
-
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-    'localhost',
-    'app',
-    'postgres',
-    'django.shoe-shop.site',
-    'shoe-shop.site',
-    '5.35.85.27',
-]
-
-# ALLOWED_HOSTS = [os.getenv('ALLOWED_HOST')]
-
-
-if DEBUG:
-    import socket
-
-    hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
-    INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
-
-
-def custom_show_toolbar(request):
-    return False
-
-
-DEBUG_TOOLBAR_CONFIG = {
-    'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
-}
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -65,7 +32,6 @@ INSTALLED_APPS = [
     'django.contrib.postgres',
 
     'django_countries',
-    'debug_toolbar',
     'django_celery_beat',
     'dynamic_breadcrumbs',
 
@@ -199,9 +165,6 @@ EMAIL_PORT = os.getenv('EMAIL_PORT')
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 SERVER_EMAIL = EMAIL_HOST_USER
 EMAIL_ADMIN = EMAIL_HOST_USER
-
-CSRF_TRUSTED_ORIGINS = ['https://*.shoe-shop.site', 'http://*.shoe-shop.site', 'https://django.shoe-shop.site',
-                        'http://django.shoe-shop.site', 'https://127.0.0.1']
 
 LOGGING = {
     "version": 1,

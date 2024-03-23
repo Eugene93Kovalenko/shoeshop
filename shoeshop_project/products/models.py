@@ -1,5 +1,6 @@
 import uuid
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
@@ -138,6 +139,11 @@ class ProductImage(models.Model):
 
     def get_absolute_url(self):
         return self.image.url
+
+    # def save(self, *args, **kwargs):
+    #     if self.is_main is not True:
+    #         raise ValidationError("At least one main image is required.")
+    #     super().save(*args, **kwargs)
 
 
 class Review(models.Model):

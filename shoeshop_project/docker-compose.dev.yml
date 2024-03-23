@@ -1,5 +1,4 @@
 version: '3.8'
-#version: '2'
 
 services:
   db:
@@ -16,16 +15,13 @@ services:
     build:
      context: .
      dockerfile: Dockerfile
-     target: prod
+     target: dev
     container_name: app
 #    restart: unless-stopped
     command: >
       bash -c "python manage.py collectstatic --noinput && python manage.py makemigrations && python manage.py migrate
-      && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
+      && python manage.py runserver 0.0.0.0:8000"
     env_file: .env
-    environment:
-      - VIRTUAL_HOST=django.shoe-shop.site
-      - LETSENCRYPT_HOST=django.shoe-shop.site
     volumes:
       - ./:/app
       - static_volume:/app/static
@@ -34,42 +30,6 @@ services:
       - '8000:8000'
     depends_on:
       - db
-
-  nginx:
-    build: ./nginx
-    container_name: nginx
-#    restart: unless-stopped
-    volumes:
-      - static_volume:/static
-      - media_volume:/media
-      - certs:/etc/nginx/certs
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    ports:
-      - '80:80'
-      - '443:443'
-    depends_on:
-      - app
-    profiles:
-      - prod
-
-  acme_companion:
-    image: nginxproxy/acme-companion:2.2
-    container_name: acme-companion
-    env_file: .env
-#    volumes_from:
-#      - nginx
-    volumes:
-      - static_volume:/static
-      - media_volume:/media
-      - certs:/etc/nginx/certs
-      - vhost:/etc/nginx/vhost.d
-      - html:/usr/share/nginx/html
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - acme:/etc/acme.sh
-    profiles:
-      - prod
 
   celery:
     build: .
@@ -119,7 +79,3 @@ volumes:
   postgres_volume:
   static_volume:
   media_volume:
-  certs:
-  vhost:
-  html:
-  acme:
