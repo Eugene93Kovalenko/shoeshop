@@ -1,5 +1,4 @@
 version: '3.8'
-#version: '2'
 
 services:
   db:
@@ -22,8 +21,6 @@ services:
     command: >
       bash -c "python manage.py collectstatic --noinput && python manage.py makemigrations && python manage.py migrate
       && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
-#    command: >
-#      bash -c "python manage.py collectstatic --noinput && gunicorn config.wsgi:application --bind 0.0.0.0:8000"
     env_file: .env
     environment:
       - VIRTUAL_HOST=django.shoe-shop.site
@@ -58,11 +55,9 @@ services:
   acme_companion:
     image: nginxproxy/acme-companion:2.2
     container_name: acme-companion
-#    env_file: .env
+    env_file: .env
     environment:
       - NGINX_PROXY_CONTAINER=nginx
-#    volumes_from:
-#      - nginx
     volumes:
       - static_volume:/static
       - media_volume:/media
@@ -115,6 +110,19 @@ services:
     depends_on:
       - app
       - db
+
+  portainer:
+    image: portainer/portainer-ce:2.20.0
+    container_name: portainer
+#    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /opt/portainer/portainer_data:/data
+    ports:
+      - "8000:8000"
+      - "9443:9443"
 
 volumes:
   postgres_volume:
