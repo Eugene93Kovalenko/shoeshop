@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django_tools.middlewares import ThreadLocal
 
 from orders.cart import Cart
-from products.models import Product, ProductImage
+from products.models import Product
 
 
 @receiver(pre_save, sender=Product)

@@ -1,7 +1,5 @@
-from django.db import models
 from django_countries.fields import CountryField
 
-from config import settings
 from products.models import *
 
 
@@ -31,11 +29,13 @@ class Order(models.Model):
     start_datetime = models.DateTimeField(auto_now_add=True)
     ordered_datetime = models.DateTimeField()
     ordered = models.BooleanField(default=False)
-    shipping_address = models.ForeignKey('ShippingAddress',
-                                         related_name='shipping_address',
-                                         on_delete=models.SET_NULL,
-                                         blank=True,
-                                         null=True)
+    shipping_address = models.ForeignKey(
+        'ShippingAddress',
+        related_name='shipping_address',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
 
     def __str__(self):
         if self.ordered:

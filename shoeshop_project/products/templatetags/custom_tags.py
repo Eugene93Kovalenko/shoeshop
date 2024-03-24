@@ -4,7 +4,7 @@ from django import template
 register = template.Library()
 
 
-# для того, чтобы пагинация работала при сортировке/фильтрации
+# for pagination and filtering work together
 @register.simple_tag()
 def relative_url(argument, value, urlencode=None):
     url = f'?{argument}={value}'
@@ -16,18 +16,6 @@ def relative_url(argument, value, urlencode=None):
         encoded_querystring = '&'.join(filtered_querystring)
         url += f'&{encoded_querystring}'
     return url
-
-
-# @register.simple_tag
-# def call_get_absolute_url(product_id):
-#     product = get_single_product(product_id)
-#     return product.get_absolute_url()
-#
-#
-# @register.simple_tag
-# def call_get_remove_from_cart_url(product_id):
-#     product = get_single_product(product_id)
-#     return product.get_remove_from_cart_url()
 
 
 @register.simple_tag

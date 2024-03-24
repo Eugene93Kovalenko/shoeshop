@@ -44,11 +44,3 @@ class ProductReviewInline(admin.TabularInline):
 class ProductAdmin(admin.ModelAdmin):
     readonly_fields = ('purchases_count', 'id')
     inlines = [ProductVariationInline, ProductImageInline, ProductReviewInline]
-
-    # def clean(self):
-    #     cleaned_data = super().clean()
-    #     print(cleaned_data)
-    #     images = cleaned_data.get('images')
-    #     main_images_count = sum(1 for image in images.all() if image.is_main)
-    #     if main_images_count != 1:
-    #         raise ValidationError('Exactly one image should be marked as main image.')

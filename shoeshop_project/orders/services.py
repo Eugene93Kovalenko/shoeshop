@@ -54,11 +54,9 @@ def handle_successful_payment(session):
     user_email = session['customer_details']['email']
     user_name = session['customer_details']['name']
     amount = session['amount_total']
-    print('---------------')
     user = get_custom_user(user_id)
     update_order_items(user)
     order = get_order(user)
-    print('++++++++++++++++')
 
     update_product_purchases_count_and_quantity_in_stock(order)
     update_order(order)

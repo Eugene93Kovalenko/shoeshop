@@ -7,7 +7,7 @@ from factory import fuzzy
 from faker import Faker
 
 from accounts.models import CustomUser
-from products.models import Product, Color, Gender, Brand, Category, ProductVariation, Size, Review
+from products.models import Product, Color, Gender, Brand, ProductVariation, Size, Review
 
 fake = Faker()
 
@@ -19,7 +19,6 @@ class ProductFactory(factory.django.DjangoModelFactory):
     price = fuzzy.FuzzyDecimal(100, 500)
     discount = fuzzy.FuzzyInteger(0, 20, step=5)
     description = fake.paragraph(nb_sentences=3)
-    # category = Category.objects.all()[:randint(1, 3)]
 
     @factory.lazy_attribute
     def name(self):
@@ -36,11 +35,6 @@ class ProductFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def brand(self):
         return Brand.objects.get(id=randint(1, 7))
-
-
-# class ProductFactory(factory.django.DjangoModelFactory):
-#     class Meta:
-#         model = Product
 
 
 class ProductVariationFactory(factory.django.DjangoModelFactory):
@@ -79,4 +73,3 @@ class ProductReviewFactory(factory.django.DjangoModelFactory):
     @factory.lazy_attribute
     def last_name(self):
         return fake.last_name()
-

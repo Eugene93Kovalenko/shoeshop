@@ -3,7 +3,7 @@ import logging
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views import generic
 from django.views.decorators.csrf import csrf_exempt
@@ -108,7 +108,6 @@ class CreateStripeCheckoutSessionView(generic.View):
 class StripeWebhookView(generic.View):
     @staticmethod
     def post(request):
-        print('webhoooooooook')
         payload = request.body
         endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
