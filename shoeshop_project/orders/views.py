@@ -108,6 +108,7 @@ class CreateStripeCheckoutSessionView(generic.View):
 class StripeWebhookView(generic.View):
     @staticmethod
     def post(request):
+        print('webhoooooooook')
         payload = request.body
         endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
