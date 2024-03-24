@@ -17,8 +17,6 @@ RUN pip install -r /prod-requirements.txt
 WORKDIR /app
 COPY . .
 
-#CMD ["gunicorn", "--bind","0.0.0.0:8000", "config.wsgi:application"]
-
 FROM base AS dev
 
 COPY requirements/dev-requirements.txt /
