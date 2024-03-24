@@ -106,7 +106,7 @@ services:
     container_name: stripe
     restart: always
     entrypoint: stripe
-    command: listen --api-key ${STRIPE_SECRET_KEY} --forward-to ${ALLOWED_HOST}/webhooks/stripe/
+    command: listen --api-key ${STRIPE_SECRET_KEY} --forward-to https://${ALLOWED_HOST}/webhooks/stripe/
     env_file: .env
     depends_on:
       - app
