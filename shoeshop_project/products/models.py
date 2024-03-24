@@ -1,6 +1,5 @@
 import uuid
 
-from django.core.exceptions import ValidationError
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.urls import reverse
@@ -80,7 +79,7 @@ class Product(models.Model):
     discount = models.PositiveIntegerField(
         default=0, blank=True, validators=[MinValueValidator(0), MaxValueValidator(99)]
     )
-    # automatically updated via signals
+    # automatically updates via signals
     actual_price = models.DecimalField(max_digits=7, decimal_places=2, blank=True)
     color = models.ForeignKey(Color, on_delete=models.CASCADE)
     gender = models.ForeignKey(Gender, on_delete=models.CASCADE)
@@ -139,11 +138,6 @@ class ProductImage(models.Model):
 
     def get_absolute_url(self):
         return self.image.url
-
-    # def save(self, *args, **kwargs):
-    #     if self.is_main is not True:
-    #         raise ValidationError("At least one main image is required.")
-    #     super().save(*args, **kwargs)
 
 
 class Review(models.Model):
