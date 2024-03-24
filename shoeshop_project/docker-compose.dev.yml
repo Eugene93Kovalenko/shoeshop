@@ -4,7 +4,6 @@ services:
   db:
     image: postgres:16.1
     container_name: postgres
-#    restart: unless-stopped
     env_file: .env
     volumes:
       - postgres_volume:/var/lib/postgresql/data/
@@ -17,7 +16,6 @@ services:
      dockerfile: Dockerfile
      target: dev
     container_name: app
-#    restart: unless-stopped
     command: >
       bash -c "python manage.py collectstatic --noinput && python manage.py makemigrations && python manage.py migrate
       && python manage.py runserver 0.0.0.0:8000"
@@ -34,7 +32,6 @@ services:
   celery:
     build: .
     container_name: celery
-#    restart: unless-stopped
     command: celery -A config worker -l INFO
     env_file: .env
     volumes:
@@ -47,7 +44,6 @@ services:
   celery-beat:
     build: .
     container_name: celery-beat
-#    restart: unless-stopped
     command: celery -A config beat -l INFO
     env_file: .env
     volumes:
@@ -67,7 +63,6 @@ services:
   stripe:
     image: stripe/stripe-cli:v1.19.1
     container_name: stripe
-#    restart: unless-stopped
     entrypoint: stripe
     command: listen --api-key ${STRIPE_SECRET_KEY} --forward-to ${ALLOWED_HOST}/webhooks/stripe/
     env_file: .env

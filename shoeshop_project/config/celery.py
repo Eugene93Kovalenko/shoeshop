@@ -3,11 +3,17 @@ import os
 
 from celery import Celery
 from celery.schedules import crontab
+from dotenv import load_dotenv
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings.settings')
+load_dotenv()
+
+# prod or dev mode
+project_mode = os.getenv('PROJECT_MODE')
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', f'config.settings.{project_mode}')
 
 app = Celery('config')
-app.config_from_object('django.conf:settings.settings', namespace='CELERY')
+app.config_from_object(f'config.settings.{project_mode}', namespace='CELERY')
 app.conf.update(
     broker_connection_retry_on_startup=True,
     broker_transport_options={"visibility_timeout": 1800},
