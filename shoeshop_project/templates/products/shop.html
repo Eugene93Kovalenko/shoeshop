@@ -29,29 +29,6 @@
             {% include 'includes/sidebar_filters.html' %}
             <div class="col-lg-9 col-xl-9">
                 <div class="row row-pb-md">
-                    <!--                    {% if products %}-->
-                    <!--                    {% for product in products %}-->
-                    <!--                    <div class="col-lg-4 mb-4 text-center">-->
-                    <!--                        <div class="product-entry border">-->
-                    <!--                            <a href="{{ product.get_absolute_url }}" class="prod-img">-->
-                    <!--                                <img src="{{ product.images.first.get_absolute_url }}" class="img-fluid" alt="img">-->
-                    <!--                            </a>-->
-                    <!--                            <div class="desc">-->
-                    <!--                                <h2><a href="{{ product.get_absolute_url }}">{{ product.name }}</a></h2>-->
-                    <!--                                {% if product.discount %}-->
-                    <!--                                <h6>${{ product.get_discount_price }}-->
-                    <!--                                    <del class="text-muted ml-2">${{ product.price }}</del>-->
-                    <!--                                </h6>-->
-                    <!--                                {% else %}-->
-                    <!--                                <h6>${{ product.price }}</h6>-->
-                    <!--                                {% endif %}-->
-                    <!--                            </div>-->
-                    <!--                        </div>-->
-                    <!--                    </div>-->
-                    <!--                    {% endfor %}-->
-                    <!--                    {% else %}-->
-                    <!--                    <h1>No products found</h1>-->
-                    <!--                    {% endif %}-->
                     {% if images %}
                     {% for image in images %}
                     <div class="col-lg-4 mb-4 text-center">

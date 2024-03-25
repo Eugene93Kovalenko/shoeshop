@@ -3,7 +3,6 @@
 {% block content %}
 <div id="page">
     <div class="container">
-
         <div class="breadcrumb">
             {% block breadcrumb %}
             {{ block.super }}
@@ -24,7 +23,6 @@
             {% breadcrumb_item product_url product.name %}
             {% endblock %}
         </div>
-
         <div class="row row-pb-lg product-detail-wrap">
             <div class="col-sm-8">
                 <div class="owl-carousel">
@@ -65,7 +63,6 @@
                             <div class="block-26 mb-2">
                                 <h4>Size</h4>
                                 {% for size in product_sizes %}
-                                <!--                                <label class="checkbox-btn">-->
                                 <label>
                                     <input type="radio" class="btn-check" name="product-size"
                                            value="{{ size }}">

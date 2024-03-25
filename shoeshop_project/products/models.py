@@ -88,7 +88,6 @@ class Product(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     purchases_count = models.PositiveIntegerField(default=0)
-    last_visit = models.DateTimeField(auto_now=True, blank=True, null=True)
     category = models.ManyToManyField(Category, related_name="products", blank=True)
 
     def __str__(self):

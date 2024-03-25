@@ -25,7 +25,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django_celery_beat',
     'dynamic_breadcrumbs',
-    'cacheops',
+    'cachalot',
 
     'products',
     'accounts',
@@ -68,7 +68,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('POSTGRES_DB'),
         'USER': os.getenv('POSTGRES_USER'),
         'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
@@ -87,7 +87,13 @@ CACHES = {
     }
 }
 
-CACHEOPS_REDIS = "redis://redis:6379/1"
+CACHALOT_ENABLED = False
+
+# CACHEOPS_REDIS = "redis://redis:6379/1"
+
+# CACHALOT_DATABASES = ['default']
+#
+# CACHALOT_CACHE = 'default'
 
 # AUTH_PASSWORD_VALIDATORS = [
 #     {

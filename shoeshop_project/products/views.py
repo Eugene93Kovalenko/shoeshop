@@ -1,4 +1,5 @@
 import logging
+from datetime import datetime
 
 from django.contrib.postgres.search import SearchVector, SearchQuery
 from django.utils import timezone
@@ -130,8 +131,7 @@ class ProductDetailView(generic.DetailView):
         product_id = self.kwargs['pk']
         update_recently_viewed_session(session=self.request.session, product_id=product_id)
         current_product = self.get_object()
-        current_product.last_visit = timezone.now()
-        current_product.save(update_fields=['last_visit'])
+        current_product.save()
         return super().get(request, *args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
