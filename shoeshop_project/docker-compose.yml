@@ -69,7 +69,10 @@ services:
       - acme:/etc/acme.sh
 
   celery:
-    build: .
+    build:
+      context: .
+#      dockerfile: Dockerfile
+      target: prod
     container_name: celery
     restart: always
     command: celery -A config worker -l INFO
@@ -82,7 +85,10 @@ services:
       - db
 
   celery-beat:
-    build: .
+    build:
+      context: .
+#      dockerfile: Dockerfile
+      target: prod
     container_name: celery-beat
     restart: always
     command: celery -A config beat -l INFO
