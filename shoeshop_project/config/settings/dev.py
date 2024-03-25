@@ -7,14 +7,11 @@ if DEBUG:
     hostname, _, ips = socket.gethostbyname_ex(socket.gethostname())
     INTERNAL_IPS = [ip[: ip.rfind(".")] + ".1" for ip in ips] + ["127.0.0.1", "10.0.2.2"]
 
-
-# def custom_show_toolbar(request):
-#     return True
-#
-#
-# DEBUG_TOOLBAR_CONFIG = {
-#     'SHOW_TOOLBAR_CALLBACK': custom_show_toolbar,
-# }
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    'app',
+]
 
 INSTALLED_APPS += [
     'debug_toolbar',
