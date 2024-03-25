@@ -4,7 +4,7 @@ from django.dispatch import receiver
 from django_tools.middlewares import ThreadLocal
 
 from orders.cart import Cart
-from products.models import Product
+from products.models import Product, Brand
 
 
 @receiver(pre_save, sender=Product)
@@ -18,5 +18,4 @@ def update_actual_price(sender, instance, **kwargs):
     request = ThreadLocal.get_current_request()
     cart = Cart(request)
     cart.update_price(instance)
-
 

@@ -37,8 +37,9 @@ class Cart:
 
     def update_price(self, instance):
         for item in self.cart.values():
-            if item['product_name'] == instance.name:
-                item['price'] = str(instance.price)
+            if item['product_id'] == str(instance.id):
+                print('-------------')
+                item['price'] = str(instance.actual_price)
                 item['total'] = item['price'] * item['quantity']
         self.save()
 
