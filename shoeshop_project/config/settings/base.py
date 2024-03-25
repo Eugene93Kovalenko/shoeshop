@@ -13,14 +13,9 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 
 CART_SESSION_ID = 'cart'
 
-BACKEND_DOMAIN = "http://localhost"
+# BACKEND_DOMAIN = "http://localhost"
 
-PAYMENT_SUCCESS_URL = os.getenv('PAYMENT_SUCCESS_URL')
-PAYMENT_CANCEL_URL = os.getenv('PAYMENT_CANCEL_URL')
-
-STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
-STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
-STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '127.0.0.1').split(',')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -34,6 +29,7 @@ INSTALLED_APPS = [
     'django_countries',
     'django_celery_beat',
     'dynamic_breadcrumbs',
+    'cacheops',
 
     'products',
     'accounts',
@@ -44,7 +40,6 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_tools.middlewares.ThreadLocal.ThreadLocalMiddleware',
@@ -88,25 +83,15 @@ DATABASES = {
 
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.redis.RedisCache",
-        "LOCATION": "redis://redis:6379",
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://redis:6379/0",
         'OPTIONS': {
-            'db': '1',
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
         }
     }
 }
 
-# CACHES = {
-#     "default": {
-#         "BACKEND": "django_redis.cache.RedisCache",
-#         "LOCATION": "redis://redis:6379/1",
-#         "OPTIONS": {
-#             "db": "1",
-#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
-#         }
-#     }
-# }
-
+CACHEOPS_REDIS = "redis://localhost:6379/1"
 
 # AUTH_PASSWORD_VALIDATORS = [
 #     {
@@ -123,38 +108,38 @@ CACHES = {
 #     },
 # ]
 
+STRIPE_PUBLIC_KEY = os.getenv('STRIPE_PUBLIC_KEY')
+STRIPE_SECRET_KEY = os.getenv('STRIPE_SECRET_KEY')
+STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+
+PAYMENT_SUCCESS_URL = os.getenv('PAYMENT_SUCCESS_URL')
+PAYMENT_CANCEL_URL = os.getenv('PAYMENT_CANCEL_URL')
+
 AUTH_USER_MODEL = "accounts.CustomUser"
 AUTHENTICATION_BACKENDS = ['django.contrib.auth.backends.ModelBackend']
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# Internationalization
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
 STATIC_URL = 'static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 STATICFILES_DIRS = []
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Media
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Celery
 CELERY_BROKER_URL = os.getenv('CELERY_BROKER')
 CELERY_RESULT_BACKEND = os.getenv('CELERY_BACKEND')
 # CELERY_CACHE_BACKEND = 'default'
 # CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
-# SMTPls
 EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL')
 EMAIL_HOST = os.getenv('EMAIL_HOST')
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
