@@ -1,10 +1,9 @@
-from django.core.exceptions import ValidationError
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django_tools.middlewares import ThreadLocal
 
 from orders.cart import Cart
-from products.models import Product, Brand
+from products.models import Product
 
 
 @receiver(pre_save, sender=Product)
@@ -14,7 +13,9 @@ def update_actual_price(sender, instance, **kwargs):
     else:
         instance.actual_price = instance.price
 
-    # todo вынести в отдельный сигнал?
+
+@receiver(post_save, sender=Product)
+def update_actual_price_in_cart(sender, instance, **kwargs):
     request = ThreadLocal.get_current_request()
     cart = Cart(request)
     cart.update_price(instance)
