@@ -30,7 +30,9 @@ services:
       - db
 
   celery:
-    build: .
+    build:
+      context: .
+      target: dev
     container_name: celery
     command: celery -A config worker -l INFO
     env_file: .env
@@ -42,7 +44,9 @@ services:
       - db
 
   celery-beat:
-    build: .
+    build:
+      context: .
+      target: dev
     container_name: celery-beat
     command: celery -A config beat -l INFO
     env_file: .env

@@ -12,11 +12,10 @@ from orders.cart import Cart
 from orders.forms import CheckoutForm
 from orders.models import *
 from .queries import \
-    get_recently_viewed_products, \
     get_product_variation, \
     create_order, \
     create_shipping_address, delete_existing_order, add_order_items_to_order, delete_existing_shipping_address, \
-    update_user_info
+    update_user_info, get_new_products
 from .services import get_metadata, get_line_items_list, handle_successful_payment
 
 
@@ -33,8 +32,7 @@ class CartView(generic.ListView):
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
-        if self.request.session.get('recently_viewed'):
-            context['recently_viewed'] = get_recently_viewed_products(self.request.session['recently_viewed'])
+        context['new_products'] = get_new_products(self.get_queryset())
         return context
 
 

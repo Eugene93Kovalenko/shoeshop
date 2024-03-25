@@ -87,13 +87,8 @@ CACHES = {
     }
 }
 
-CACHALOT_ENABLED = False
-
-# CACHEOPS_REDIS = "redis://redis:6379/1"
-
-# CACHALOT_DATABASES = ['default']
-#
-# CACHALOT_CACHE = 'default'
+CACHALOT_ENABLED = True
+CACHALOT_TIMEOUT = 60 * 60
 
 # AUTH_PASSWORD_VALIDATORS = [
 #     {

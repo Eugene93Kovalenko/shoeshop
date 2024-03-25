@@ -1,8 +1,6 @@
 import logging
-from datetime import datetime
 
 from django.contrib.postgres.search import SearchVector, SearchQuery
-from django.utils import timezone
 
 from django.db.models import Q
 from django.shortcuts import redirect
@@ -15,7 +13,7 @@ from .queries import get_filtered_products, get_all_categories, get_all_sizes, g
     get_all_colors, get_ordering_option, get_single_product, get_single_product_images, \
     get_single_product_reviews, get_single_product_reviews_quantity, \
     create_product_review, get_ratings_count, get_queryset_after_search, get_all_images, get_single_product_sizes
-from .services import get_average_rating, update_recently_viewed_session, get_ordering_from_request
+from .services import get_average_rating, get_ordering_from_request
 
 logger = logging.getLogger(__name__)
 
@@ -126,13 +124,6 @@ class ProductDetailView(generic.DetailView):
         if not hasattr(self, 'object'):
             self.object = super().get_object(queryset=queryset)
         return self.object
-
-    def get(self, request, *args, **kwargs):
-        product_id = self.kwargs['pk']
-        update_recently_viewed_session(session=self.request.session, product_id=product_id)
-        current_product = self.get_object()
-        current_product.save()
-        return super().get(request, *args, **kwargs)
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)

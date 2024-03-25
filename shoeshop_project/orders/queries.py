@@ -5,15 +5,17 @@ from django.utils import timezone
 
 from accounts.models import CustomUser
 from orders.models import Payment, OrderItem, Order, ShippingAddress
-from products.models import Product, ProductVariation, ProductImage
+from products.models import ProductVariation, ProductImage
 
 logger = logging.getLogger('main')
 
 
-def get_recently_viewed_products(session):
-    return ProductImage.objects.select_related('product').\
-        filter(is_main=True, product__id__in=session).\
-        order_by('-product__updated_at')
+def get_new_products(cart_session):
+    product_ids_in_cart = [product['product_id'] for product in cart_session]
+    return ProductImage.objects.select_related('product'). \
+                                filter(is_main=True). \
+                                exclude(product__id__in=product_ids_in_cart). \
+                                order_by('-product__created_at')[:4]
 
 
 def get_custom_user(user_id):

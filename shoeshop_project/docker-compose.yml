@@ -71,7 +71,6 @@ services:
   celery:
     build:
       context: .
-#      dockerfile: Dockerfile
       target: prod
     container_name: celery
     restart: always
@@ -87,7 +86,6 @@ services:
   celery-beat:
     build:
       context: .
-#      dockerfile: Dockerfile
       target: prod
     container_name: celery-beat
     restart: always
