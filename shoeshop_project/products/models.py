@@ -93,13 +93,13 @@ class Product(models.Model):
     def __str__(self):
         return self.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return reverse("products:product-detail", kwargs={"pk": str(self.pk)})
 
-    def get_add_to_cart_url(self):
+    def get_add_to_cart_url(self) -> str:
         return reverse("orders:add-to-cart", kwargs={"pk": str(self.pk)})
 
-    def get_remove_from_cart_url(self):
+    def get_remove_from_cart_url(self) -> str:
         return reverse("orders:remove-from-cart", kwargs={"pk": str(self.pk)})
 
     class Meta:
@@ -135,7 +135,7 @@ class ProductImage(models.Model):
     def __str__(self):
         return self.image.name
 
-    def get_absolute_url(self):
+    def get_absolute_url(self) -> str:
         return self.image.url
 
 

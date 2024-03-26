@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.db import transaction
+from django.http import HttpRequest
 from django_tools.middlewares import ThreadLocal
 
 from orders.cart import Cart
@@ -9,7 +10,7 @@ from .queries import update_product_purchases_count_and_quantity_in_stock, creat
     update_order_items, update_order, get_order
 
 
-def get_metadata(request):
+def get_metadata(request: HttpRequest) -> dict[int, int]:
     cart = Cart(request)
     metadata = {}
     for item in cart:
@@ -17,7 +18,7 @@ def get_metadata(request):
     return metadata
 
 
-def get_line_items_list(request):
+def get_line_items_list(request: HttpRequest) -> list:
     cart = Cart(request)
     line_items_list = []
     for item in cart:
@@ -49,7 +50,7 @@ def get_line_items_list(request):
 
 
 @transaction.atomic
-def handle_successful_payment(session):
+def handle_successful_payment(session) -> None:
     user_id = session['client_reference_id']
     user_email = session['customer_details']['email']
     user_name = session['customer_details']['name']

@@ -7,7 +7,7 @@ from products.models import Product
 
 
 @receiver(pre_save, sender=Product)
-def update_actual_price(sender, instance, **kwargs):
+def update_actual_price(sender, instance: Product, **kwargs) -> None:
     if instance.discount:
         instance.actual_price = round(instance.price - ((instance.price * instance.discount) / 100), 2)
     else:
@@ -15,7 +15,7 @@ def update_actual_price(sender, instance, **kwargs):
 
 
 @receiver(post_save, sender=Product)
-def update_actual_price_in_cart(sender, instance, **kwargs):
+def update_actual_price_in_cart(sender, instance: Product, **kwargs) -> None:
     request = ThreadLocal.get_current_request()
     cart = Cart(request)
     cart.update_price(instance)

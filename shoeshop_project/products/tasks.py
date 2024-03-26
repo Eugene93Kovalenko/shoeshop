@@ -5,7 +5,7 @@ from django.core.mail import send_mail
 
 
 @shared_task()
-def send_email_from_contact_form(first_name, last_name, sender, subject, message):
+def send_email_from_contact_form(first_name: str, last_name: str, sender: str, subject: str, message: str) -> None:
     body = f"""
         Name: {first_name} {last_name}.\n\n
         From email: {sender}\n\n

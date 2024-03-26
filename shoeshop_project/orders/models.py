@@ -18,7 +18,7 @@ class OrderItem(models.Model):
         verbose_name = "Product in cart"
         verbose_name_plural = "Products in cart"
 
-    def get_remove_from_cart_url(self):
+    def get_remove_from_cart_url(self) -> str:
         return reverse("orders:remove-from-cart", kwargs={"slug": self.product_variation.product.slug})
 
 

@@ -10,7 +10,7 @@ from orders.models import Order
 
 
 @shared_task()
-def send_order_conformation_mail(user_name, user_email):
+def send_order_conformation_mail(user_name: str, user_email: str) -> None:
     body = f"""
         Hi {user_name}!\n\n
         Thank you for your purchase!\n\n
@@ -19,7 +19,7 @@ def send_order_conformation_mail(user_name, user_email):
 
 
 @shared_task()
-def send_email_with_orders_count_made_yesterday():
+def send_email_with_orders_count_made_yesterday() -> None:
     yesterday = timezone.now() - timedelta(days=1)
     start_of_yesterday = timezone.make_aware(timezone.datetime.combine(yesterday.date(), timezone.datetime.min.time()))
     end_of_yesterday = timezone.make_aware(timezone.datetime.combine(yesterday.date(), timezone.datetime.max.time()))

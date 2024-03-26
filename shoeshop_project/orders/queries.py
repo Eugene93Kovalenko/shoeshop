@@ -1,16 +1,19 @@
 import logging
 
+from django.db.models import QuerySet
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 
 from accounts.models import CustomUser
+from orders.cart import Cart
+from orders.forms import CheckoutForm
 from orders.models import Payment, OrderItem, Order, ShippingAddress
 from products.models import ProductVariation, ProductImage
 
 logger = logging.getLogger('main')
 
 
-def get_new_products(cart_session):
+def get_new_products(cart_session: Cart) -> QuerySet[ProductImage]:
     product_ids_in_cart = [product['product_id'] for product in cart_session]
     return ProductImage.objects.select_related('product'). \
                                 filter(is_main=True). \
@@ -18,11 +21,11 @@ def get_new_products(cart_session):
                                 order_by('-product__created_at')[:4]
 
 
-def get_custom_user(user_id):
+def get_custom_user(user_id: int) -> CustomUser:
     return CustomUser.objects.get(id=user_id)
 
 
-def update_product_purchases_count_and_quantity_in_stock(order):
+def update_product_purchases_count_and_quantity_in_stock(order: Order) -> None:
     items = order.products.all()
     for item in items:
         quantity = item.quantity
@@ -34,7 +37,7 @@ def update_product_purchases_count_and_quantity_in_stock(order):
         item.product_variation.product.save()
 
 
-def create_order_item(user, product_variation_id, quantity):
+def create_order_item(user: CustomUser, product_variation_id: int, quantity: int) -> OrderItem:
     product_variation = ProductVariation.objects.get(id=product_variation_id)
     order_item = OrderItem.objects.create(
         user=user,
@@ -44,7 +47,7 @@ def create_order_item(user, product_variation_id, quantity):
     return order_item
 
 
-def create_order(user):
+def create_order(user: CustomUser) -> Order:
     order_datetime = timezone.now()
     order = Order.objects.create(
         user=user,
@@ -54,7 +57,7 @@ def create_order(user):
     return order
 
 
-def create_payment(session_id, user, order, amount):
+def create_payment(session_id: str, user: CustomUser, order: Order, amount: int) -> None:
     Payment.objects.create(
         stripe_charge_id=session_id,
         user=user,
@@ -63,19 +66,19 @@ def create_payment(session_id, user, order, amount):
     )
 
 
-def get_product_variation(product_id, size):
+def get_product_variation(product_id: str, size: str) -> ProductVariation | None:
     return get_object_or_404(ProductVariation, product__id=product_id, size__name=size)
 
 
-def get_order_items(user):
+def get_order_items(user: CustomUser) -> QuerySet[OrderItem]:
     return OrderItem.objects.filter(user=user, ordered=False)
 
 
-def update_order_items(user):
-    return get_order_items(user).update(ordered=True)
+def update_order_items(user: CustomUser):
+    get_order_items(user).update(ordered=True)
 
 
-def get_order(user):
+def get_order(user: CustomUser) -> Order | None:
     try:
         return Order.objects.get(user=user, ordered=False)
     except Order.DoesNotExist:
@@ -85,7 +88,7 @@ def get_order(user):
         return None
 
 
-def get_shipping_address(user):
+def get_shipping_address(user: CustomUser) -> ShippingAddress | None:
     try:
         return ShippingAddress.objects.get(user=user)
     except ShippingAddress.DoesNotExist:
@@ -95,7 +98,7 @@ def get_shipping_address(user):
         return None
 
 
-def create_shipping_address(user, form):
+def create_shipping_address(user: CustomUser, form: CheckoutForm) -> ShippingAddress:
     return ShippingAddress.objects.create(
         user=user,
         country=form.cleaned_data['country'],
@@ -107,14 +110,14 @@ def create_shipping_address(user, form):
     )
 
 
-def update_order(order):
+def update_order(order: Order) -> None:
     ordered_datetime = timezone.now()
     order.ordered_datetime = ordered_datetime
     order.ordered = True
     order.save()
 
 
-def delete_existing_order(user):
+def delete_existing_order(user: CustomUser) -> None:
     existing_order = get_order(user)
     if existing_order:
         existing_order.delete()
@@ -123,25 +126,25 @@ def delete_existing_order(user):
             item.delete()
 
 
-def add_order_items_to_order(cart, order, user):
+def add_order_items_to_order(cart, order: Order, user: CustomUser) -> None:
     for item in cart:
         order_item = create_order_item(user, item['product_variation_id'], item['quantity'])
         order.products.add(order_item)
 
 
-def delete_existing_shipping_address(user):
+def delete_existing_shipping_address(user: CustomUser) -> None:
     existing_shipping_address = get_shipping_address(user)
     if existing_shipping_address:
         existing_shipping_address.delete()
 
 
-def create_new_shipping_address(user, form, order):
+def create_new_shipping_address(user: CustomUser, form: CheckoutForm, order: Order) -> None:
     new_shipping_address = create_shipping_address(user, form)
     order.shipping_address = new_shipping_address
     order.save()
 
 
-def update_user_info(user, form):
+def update_user_info(user: CustomUser, form: CheckoutForm) -> None:
     user.first_name = form.cleaned_data['first_name']
     user.last_name = form.cleaned_data['last_name']
     user.phone = form.cleaned_data['phone']

@@ -1,8 +1,10 @@
 import logging
+from typing import Any
 
 from django.contrib.postgres.search import SearchVector, SearchQuery
 
-from django.db.models import Q
+from django.db.models import Q, QuerySet
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.views import generic
 
@@ -23,7 +25,7 @@ class HomeView(generic.ListView):
     template_name = "products/index.html"
     context_object_name = "images"
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[ProductImage]:
         return get_all_images()
 
 
@@ -33,7 +35,7 @@ class ShopView(generic.ListView):
     context_object_name = "images"
     paginate_by = 9
 
-    def get_filters(self):
+    def get_filters(self) -> Q:
         brand_q, size_q, category_q, color_q = Q(), Q(), Q(), Q()
 
         brands = self.request.GET.getlist('brands')
@@ -54,10 +56,11 @@ class ShopView(generic.ListView):
                 color_q |= Q(product__color__name=color)
         return brand_q & size_q & category_q & color_q
 
-    def get_ordering(self):
+    def get_ordering(self) -> str | None:
+        print(type(self.request))
         return get_ordering_from_request(self.request)
 
-    def get_gender_filter(self):
+    def get_gender_filter(self) -> dict[str: str]:
         gender_variations = {
             '/shop/women/': {'product__gender__name': 'Women'},
             '/shop/men/': {'product__gender__name': 'Men'},
@@ -65,10 +68,10 @@ class ShopView(generic.ListView):
         gender_filter = gender_variations.get(self.request.path, {})
         return gender_filter
 
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[ProductImage]:
         return get_filtered_products(self.get_filters(), self.get_ordering(), self.get_gender_filter())
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, *, object_list=None, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['ordering_options'] = get_ordering_option()
         context['brands_list'] = get_all_brands()
@@ -86,7 +89,7 @@ class ShopView(generic.ListView):
 
 
 class SearchView(ShopView):
-    def get_queryset(self):
+    def get_queryset(self) -> QuerySet[ProductImage]:
         query = self.request.GET.get('q')
         search_vector = \
             SearchVector('product__name', weight='A') + \
@@ -98,18 +101,19 @@ class SearchView(ShopView):
         searched_queryset = get_queryset_after_search(super().get_queryset(), search_vector, search_query)
         return searched_queryset
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, *, object_list=None, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['q'] = self.request.GET.get('q')
         return context
 
 
 class ProductView(generic.View):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, *args, **kwargs) -> HttpResponse:
         view = ProductDetailView.as_view()
+        print(type(view))
         return view(request, *args, **kwargs)
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> HttpResponse:
         view = ProductFormView.as_view()
         return view(request, *args, **kwargs)
 
@@ -120,12 +124,12 @@ class ProductDetailView(generic.DetailView):
     context_object_name = "product"
     pk_url_kwarg = 'pk'
 
-    def get_object(self, queryset=None):
+    def get_object(self, queryset=None) -> Product:
         if not hasattr(self, 'object'):
             self.object = super().get_object(queryset=queryset)
         return self.object
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, *, object_list=None, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         product_id = self.kwargs['pk']
         context["form"] = ReviewForm()
@@ -147,7 +151,7 @@ class ProductFormView(generic.FormView):
     template_name = "products/product-detail.html"
     form_class = ReviewForm
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs) -> HttpResponse:
         if self.request.user.is_anonymous:
             return redirect('accounts:login')
         form = self.get_form()
@@ -156,7 +160,7 @@ class ProductFormView(generic.FormView):
         else:
             return self.form_invalid(form)
 
-    def form_valid(self, form):
+    def form_valid(self, form: ReviewForm) -> HttpResponseRedirect:
         product = get_single_product(self.kwargs['pk'])
         form_data = form.cleaned_data
         create_product_review(
@@ -169,7 +173,7 @@ class ProductFormView(generic.FormView):
         )
         return super(ProductFormView, self).form_valid(form)
 
-    def get_success_url(self):
+    def get_success_url(self) -> str:
         return reverse('products:home')
 
 
@@ -177,7 +181,7 @@ class ContactView(generic.FormView):
     template_name = "products/contact.html"
     form_class = ContactForm
 
-    def form_valid(self, form):
+    def form_valid(self, form) -> HttpResponseRedirect:
         first_name = form.cleaned_data['first_name']
         last_name = form.cleaned_data['last_name']
         sender = form.cleaned_data['email']
@@ -187,7 +191,7 @@ class ContactView(generic.FormView):
         tasks.send_email_from_contact_form.delay(first_name, last_name, sender, subject, message)
         return super(ContactView, self).form_valid(form)
 
-    def get_success_url(self):
+    def get_success_url(self) -> str:
         return reverse('products:home')
 
 

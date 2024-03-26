@@ -1,8 +1,10 @@
+from typing import Any
+
 import stripe
 import logging
 from django.contrib import messages
 from django.db import transaction
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 from django.shortcuts import redirect
 from django.utils.decorators import method_decorator
 from django.views import generic
@@ -26,10 +28,10 @@ class CartView(generic.ListView):
     template_name = "orders/cart.html"
     context_object_name = 'cart_items'
 
-    def get_queryset(self):
+    def get_queryset(self) -> Cart:
         return Cart(self.request)
 
-    def get_context_data(self, *, object_list=None, **kwargs):
+    def get_context_data(self, *, object_list=None, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context['user'] = self.request.user
         context['new_products'] = get_new_products(self.get_queryset())
@@ -37,7 +39,7 @@ class CartView(generic.ListView):
 
 
 class AddToCart(generic.View):
-    def post(self, request, pk):
+    def post(self, request: HttpRequest, pk: str) -> HttpResponse:
         if request.POST.get('quantity') == '0' or not request.POST.get('product-size'):
             messages.warning(request, "You have to choose product size and quantity")
             return redirect(request.META.get('HTTP_REFERER'))
@@ -53,7 +55,7 @@ class AddToCart(generic.View):
 
 
 class RemoveFromCart(generic.View):
-    def post(self, request, pk):
+    def post(self, request: HttpRequest, pk: str) -> HttpResponse:
         cart = Cart(self.request)
         size = request.POST.get('size')
         product_variation = get_product_variation(pk, size)
@@ -65,11 +67,11 @@ class CheckoutFormView(generic.FormView):
     template_name = "orders/checkout.html"
     form_class = CheckoutForm
 
-    def get_success_url(self):
+    def get_success_url(self) -> str:
         return reverse('orders:create-checkout-session')
 
     @transaction.atomic
-    def form_valid(self, form):
+    def form_valid(self, form: CheckoutForm) -> HttpResponseRedirect:
         cart = Cart(self.request)
         user = self.request.user
 
@@ -89,7 +91,7 @@ class CheckoutFormView(generic.FormView):
 class CreateStripeCheckoutSessionView(generic.View):
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
-    def get(self, request):
+    def get(self, request: HttpRequest) -> HttpResponse:
         checkout_session = stripe.checkout.Session.create(
             client_reference_id=request.user.id,
             payment_method_types=['card'],
@@ -105,7 +107,7 @@ class CreateStripeCheckoutSessionView(generic.View):
 @method_decorator(csrf_exempt, name="dispatch")
 class StripeWebhookView(generic.View):
     @staticmethod
-    def post(request):
+    def post(request: HttpRequest) -> HttpResponse:
         payload = request.body
         endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
         sig_header = request.META["HTTP_STRIPE_SIGNATURE"]
@@ -129,7 +131,7 @@ class StripeWebhookView(generic.View):
 class OrderCompleteView(generic.TemplateView):
     template_name = "orders/order-complete.html"
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
         cart = Cart(request)
         cart.clear()
         context = super().get_context_data(**kwargs)

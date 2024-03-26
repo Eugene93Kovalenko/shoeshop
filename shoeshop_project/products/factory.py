@@ -21,19 +21,19 @@ class ProductFactory(factory.django.DjangoModelFactory):
     description = fake.paragraph(nb_sentences=3)
 
     @factory.lazy_attribute
-    def name(self):
+    def name(self) -> str:
         return f"{fake.word().capitalize()} {fake.word()} shoes"
 
     @factory.lazy_attribute
-    def color(self):
+    def color(self) -> Color:
         return Color.objects.get(id=randint(1, 6))
 
     @factory.lazy_attribute
-    def gender(self):
+    def gender(self) -> Gender:
         return Gender.objects.get(id=randint(1, 2))
 
     @factory.lazy_attribute
-    def brand(self):
+    def brand(self) -> Brand:
         return Brand.objects.get(id=randint(1, 7))
 
 
@@ -42,11 +42,11 @@ class ProductVariationFactory(factory.django.DjangoModelFactory):
         model = ProductVariation
 
     @factory.lazy_attribute
-    def size(self):
+    def size(self) -> Size:
         product = self.product
         size_objects = list(Size.objects.all())
-        product_vars = ProductVariation.objects.filter(product=product)
-        for product_var in product_vars:
+        product_variations = ProductVariation.objects.filter(product=product)
+        for product_var in product_variations:
             size_objects.remove(product_var.size)
         if size_objects:
             return size_objects[randint(0, len(size_objects) - 1)]
@@ -67,9 +67,9 @@ class ProductReviewFactory(factory.django.DjangoModelFactory):
     user = CustomUser.objects.all()[0]
 
     @factory.lazy_attribute
-    def first_name(self):
+    def first_name(self) -> str:
         return fake.first_name()
 
     @factory.lazy_attribute
-    def last_name(self):
+    def last_name(self) -> str:
         return fake.last_name()
