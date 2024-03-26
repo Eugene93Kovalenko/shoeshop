@@ -25,6 +25,8 @@ logger = logging.getLogger('main')
 
 
 class CartView(generic.ListView):
+    """View class for displaying the contents of the cart."""
+
     template_name = "orders/cart.html"
     context_object_name = 'cart_items'
 
@@ -39,6 +41,8 @@ class CartView(generic.ListView):
 
 
 class AddToCart(generic.View):
+    """View class for adding a product to the cart."""
+
     def post(self, request: HttpRequest, pk: str) -> HttpResponse:
         if request.POST.get('quantity') == '0' or not request.POST.get('product-size'):
             messages.warning(request, "You have to choose product size and quantity")
@@ -55,6 +59,8 @@ class AddToCart(generic.View):
 
 
 class RemoveFromCart(generic.View):
+    """View class for removing a product from the cart."""
+
     def post(self, request: HttpRequest, pk: str) -> HttpResponse:
         cart = Cart(self.request)
         size = request.POST.get('size')
@@ -64,6 +70,8 @@ class RemoveFromCart(generic.View):
 
 
 class CheckoutFormView(generic.FormView):
+    """View class for processing the checkout form."""
+
     template_name = "orders/checkout.html"
     form_class = CheckoutForm
 
@@ -89,6 +97,8 @@ class CheckoutFormView(generic.FormView):
 
 
 class CreateStripeCheckoutSessionView(generic.View):
+    """View class for creating a Stripe checkout session."""
+
     stripe.api_key = settings.STRIPE_SECRET_KEY
 
     def get(self, request: HttpRequest) -> HttpResponse:
@@ -106,6 +116,8 @@ class CreateStripeCheckoutSessionView(generic.View):
 
 @method_decorator(csrf_exempt, name="dispatch")
 class StripeWebhookView(generic.View):
+    """View class for handling webhook events from Stripe."""
+
     @staticmethod
     def post(request: HttpRequest) -> HttpResponse:
         payload = request.body
@@ -129,6 +141,8 @@ class StripeWebhookView(generic.View):
 
 
 class OrderCompleteView(generic.TemplateView):
+    """View class for displaying the order complete page."""
+
     template_name = "orders/order-complete.html"
 
     def get(self, request: HttpRequest, *args, **kwargs) -> HttpResponse:
@@ -139,4 +153,6 @@ class OrderCompleteView(generic.TemplateView):
 
 
 class CancelView(generic.TemplateView):
+    """View class for displaying the order cancellation page."""
+
     template_name = "orders/cancel.html"

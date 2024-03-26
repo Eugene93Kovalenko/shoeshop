@@ -21,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class HomeView(generic.ListView):
+    """View class for displaying the home page."""
+
     model = Product
     template_name = "products/index.html"
     context_object_name = "images"
@@ -30,6 +32,8 @@ class HomeView(generic.ListView):
 
 
 class ShopView(generic.ListView):
+    """View class for displaying the shop page including pages for men and for women."""
+
     model = Product
     template_name = "products/shop.html"
     context_object_name = "images"
@@ -57,7 +61,6 @@ class ShopView(generic.ListView):
         return brand_q & size_q & category_q & color_q
 
     def get_ordering(self) -> str | None:
-        print(type(self.request))
         return get_ordering_from_request(self.request)
 
     def get_gender_filter(self) -> dict[str: str]:
@@ -89,6 +92,8 @@ class ShopView(generic.ListView):
 
 
 class SearchView(ShopView):
+    """View class for handling search functionality."""
+
     def get_queryset(self) -> QuerySet[ProductImage]:
         query = self.request.GET.get('q')
         search_vector = \
@@ -108,9 +113,9 @@ class SearchView(ShopView):
 
 
 class ProductView(generic.View):
+    """View class for redirecting to another view class depending on the type of request."""
     def get(self, request, *args, **kwargs) -> HttpResponse:
         view = ProductDetailView.as_view()
-        print(type(view))
         return view(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs) -> HttpResponse:
@@ -119,6 +124,8 @@ class ProductView(generic.View):
 
 
 class ProductDetailView(generic.DetailView):
+    """View class for displaying single product details."""
+
     model = Product
     template_name = "products/product-detail.html"
     context_object_name = "product"
@@ -147,6 +154,8 @@ class ProductDetailView(generic.DetailView):
 
 
 class ProductFormView(generic.FormView):
+    """View class for handling creating product reviews."""
+
     model = Product
     template_name = "products/product-detail.html"
     form_class = ReviewForm
@@ -178,6 +187,8 @@ class ProductFormView(generic.FormView):
 
 
 class ContactView(generic.FormView):
+    """View class for displaying and handling contact form on contact page."""
+
     template_name = "products/contact.html"
     form_class = ContactForm
 
@@ -196,4 +207,6 @@ class ContactView(generic.FormView):
 
 
 class AboutView(generic.TemplateView):
+    """View class for displaying the about page."""
+
     template_name = "products/about.html"
